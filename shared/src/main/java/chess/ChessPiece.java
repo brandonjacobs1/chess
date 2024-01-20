@@ -1,11 +1,9 @@
 package chess;
 
 import chess.ChessGame.TeamColor;
-import chess.PieceMoves.KnightMoves;
-import jdk.jshell.spi.ExecutionControl;
 
 import java.util.Collection;
-import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -55,51 +53,27 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ArrayList<ChessMove> moves = null;
-        switch (this.pieceType) {
-            case KING:
-                KnightMoves knight =  new KnightMoves();
-                moves = knight.getKnightMoves(board, myPosition);
-                break;
-            case QUEEN:
-                break;
-            case BISHOP:
-                break;
-            case KNIGHT:
-                break;
-            case ROOK:
-                break;
-            case PAWN:
-                break;
-        }
-        return moves;
+        return switch (this.pieceType) {
+            case KING -> MoveCalculator.calculateMoves(MoveCalculator.kingCoordinateChanges(), myPosition);
+            case QUEEN -> MoveCalculator.calculateMoves(MoveCalculator.queenCoordinateChanges(), myPosition);
+            case BISHOP -> MoveCalculator.calculateMoves(MoveCalculator.bishopCoordinateChanges(), myPosition);
+            case KNIGHT -> MoveCalculator.calculateMoves(MoveCalculator.knightCoordinateChanges(), myPosition);
+            case ROOK -> MoveCalculator.calculateMoves(MoveCalculator.rookCoordinateChanges(), myPosition);
+            case PAWN -> MoveCalculator.calculateMoves(MoveCalculator.pawnCoordinateChanges(), myPosition);
+        };
     }
 
 
     @Override
     public String toString() {
-        String pieceLetter = "";
-
-        switch (this.pieceType) {
-            case KING:
-                pieceLetter = "K";
-                break;
-            case QUEEN:
-                pieceLetter = "Q";
-                break;
-            case BISHOP:
-                pieceLetter = "B";
-                break;
-            case KNIGHT:
-                pieceLetter = "N";
-                break;
-            case ROOK:
-                pieceLetter = "R";
-                break;
-            case PAWN:
-                pieceLetter = "P";
-                break;
-        }
+        String pieceLetter = switch (this.pieceType) {
+            case KING -> "K";
+            case QUEEN -> "Q";
+            case BISHOP -> "B";
+            case KNIGHT -> "N";
+            case ROOK -> "R";
+            case PAWN -> "P";
+        };
 
         // Adjust letter case based on team color
         if (this.teamColor == TeamColor.BLACK) {
@@ -109,4 +83,16 @@ public class ChessPiece {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return pieceType == that.pieceType && teamColor == that.teamColor;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceType, teamColor);
+    }
 }
