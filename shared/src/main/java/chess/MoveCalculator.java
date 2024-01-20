@@ -60,6 +60,15 @@ public class MoveCalculator {
     public static ArrayList<ChessPosition> kingCoordinateChanges() {
         ArrayList<ChessPosition> positions = new ArrayList<>();
 
+        positions.add(new ChessPosition(0, 1));
+        positions.add(new ChessPosition(1, 1));
+        positions.add(new ChessPosition(1, 0));
+        positions.add(new ChessPosition(1, -1));
+        positions.add(new ChessPosition(0, -1));
+        positions.add(new ChessPosition(-1, -1));
+        positions.add(new ChessPosition(-1, 0));
+        positions.add(new ChessPosition(-1, 1));
+
         return positions;
 
     }
