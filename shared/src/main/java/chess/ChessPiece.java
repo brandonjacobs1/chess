@@ -1,7 +1,11 @@
 package chess;
 
 import chess.ChessGame.TeamColor;
+import chess.PieceMoves.KnightMoves;
+import jdk.jshell.spi.ExecutionControl;
+
 import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * Represents a single chess piece
@@ -51,6 +55,58 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        ArrayList<ChessMove> moves = null;
+        switch (this.pieceType) {
+            case KING:
+                KnightMoves knight =  new KnightMoves();
+                moves = knight.getKnightMoves(board, myPosition);
+                break;
+            case QUEEN:
+                break;
+            case BISHOP:
+                break;
+            case KNIGHT:
+                break;
+            case ROOK:
+                break;
+            case PAWN:
+                break;
+        }
+        return moves;
     }
+
+
+    @Override
+    public String toString() {
+        String pieceLetter = "";
+
+        switch (this.pieceType) {
+            case KING:
+                pieceLetter = "K";
+                break;
+            case QUEEN:
+                pieceLetter = "Q";
+                break;
+            case BISHOP:
+                pieceLetter = "B";
+                break;
+            case KNIGHT:
+                pieceLetter = "N";
+                break;
+            case ROOK:
+                pieceLetter = "R";
+                break;
+            case PAWN:
+                pieceLetter = "P";
+                break;
+        }
+
+        // Adjust letter case based on team color
+        if (this.teamColor == TeamColor.BLACK) {
+            return pieceLetter.toLowerCase();
+        } else {
+            return pieceLetter.toUpperCase();
+        }
+    }
+
 }
