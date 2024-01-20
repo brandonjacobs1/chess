@@ -6,7 +6,7 @@ public class MoveCalculator {
     
     public MoveCalculator () {}
     
-    public static ArrayList<ChessMove> calculateMoves(ArrayList<ChessPosition> coordinateChanges, ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
+    public static ArrayList<ChessMove> calculateKingKnightMoves(ArrayList<ChessPosition> coordinateChanges, ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         int startRow = startPosition.getRow();
         int startCol = startPosition.getColumn();
@@ -23,6 +23,78 @@ public class MoveCalculator {
                 }
             }
         }
+        return moves;
+    }
+
+    private static void checkLine(int startRow, int startCol, ArrayList<ChessMove> moves, ChessBoard board, ChessPosition startPosition, ChessGame.TeamColor startColor, int changeX, int changeY) {
+
+        int endRow = startRow + changeX;
+        int endCol = startCol + changeY;
+
+        while (endRow >= 1 && endRow <= 8 && endCol >= 1 && endCol <= 8) { // Checks that move is in bounds
+            ChessPiece endPiece = board.getPiece(new ChessPosition(endRow, endCol));
+
+            if (endPiece == null) {
+                moves.add(new ChessMove(startPosition, new ChessPosition(endRow, endCol), null));
+            } else if (endPiece.teamColor == startColor) {
+                break;
+            } else {
+                moves.add(new ChessMove(startPosition, new ChessPosition(endRow, endCol), null));
+                break;
+            }
+
+            // Update the next position along the line
+            endRow += changeX;
+            endCol += changeY;
+        }
+    }
+
+    private static void checkDiagonal(int startRow, int startCol, ArrayList<ChessMove> moves, ChessBoard board, ChessPosition startPosition, ChessGame.TeamColor startColor, int changeX, int changeY) {
+        int endRow = startRow + changeX;
+        int endCol = startCol + changeY;
+
+        while (endRow >= 1 && endRow <= 8 && endCol >= 1 && endCol <= 8) { // Checks that move is in bounds
+            ChessPiece endPiece = board.getPiece(new ChessPosition(endRow, endCol));
+
+            if (endPiece == null) {
+                moves.add(new ChessMove(startPosition, new ChessPosition(endRow, endCol), null));
+            } else if (endPiece.teamColor == startColor) {
+                break;
+            } else {
+                moves.add(new ChessMove(startPosition, new ChessPosition(endRow, endCol), null));
+                break;
+            }
+
+            // Update the next position along the diagonal
+            endRow += changeX;
+            endCol += changeY;
+        }
+    }
+
+
+
+    public static ArrayList<ChessMove> calculateBishopMoves(ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int startRow = startPosition.getRow();
+        int startCol = startPosition.getColumn();
+
+        checkDiagonal(startRow, startCol, moves, board, startPosition, startColor, 1, 1);
+        checkDiagonal(startRow, startCol, moves, board, startPosition, startColor, -1, 1);
+        checkDiagonal(startRow, startCol, moves, board, startPosition, startColor, -1, 1);
+        checkDiagonal(startRow, startCol, moves, board, startPosition, startColor, -1, -1);
+
+        return moves;
+    }
+    public static ArrayList<ChessMove> calculateRookMoves(ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int startRow = startPosition.getRow();
+        int startCol = startPosition.getColumn();
+
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, 1, 0);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, -1, 0);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, 0, 1);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, 0, -1);
+
         return moves;
     }
 
