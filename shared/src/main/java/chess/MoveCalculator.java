@@ -6,7 +6,7 @@ public class MoveCalculator {
     
     public MoveCalculator () {}
     
-    public static ArrayList<ChessMove> calculateKingKnightMoves(ArrayList<ChessPosition> coordinateChanges, ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
+    public static ArrayList<ChessMove> checkAbsolutePositions(ArrayList<ChessPosition> coordinateChanges, ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         int startRow = startPosition.getRow();
         int startCol = startPosition.getColumn();
@@ -49,39 +49,15 @@ public class MoveCalculator {
         }
     }
 
-    private static void checkDiagonal(int startRow, int startCol, ArrayList<ChessMove> moves, ChessBoard board, ChessPosition startPosition, ChessGame.TeamColor startColor, int changeX, int changeY) {
-        int endRow = startRow + changeX;
-        int endCol = startCol + changeY;
-
-        while (endRow >= 1 && endRow <= 8 && endCol >= 1 && endCol <= 8) { // Checks that move is in bounds
-            ChessPiece endPiece = board.getPiece(new ChessPosition(endRow, endCol));
-
-            if (endPiece == null) {
-                moves.add(new ChessMove(startPosition, new ChessPosition(endRow, endCol), null));
-            } else if (endPiece.teamColor == startColor) {
-                break;
-            } else {
-                moves.add(new ChessMove(startPosition, new ChessPosition(endRow, endCol), null));
-                break;
-            }
-
-            // Update the next position along the diagonal
-            endRow += changeX;
-            endCol += changeY;
-        }
-    }
-
-
-
     public static ArrayList<ChessMove> calculateBishopMoves(ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         int startRow = startPosition.getRow();
         int startCol = startPosition.getColumn();
 
-        checkDiagonal(startRow, startCol, moves, board, startPosition, startColor, 1, 1);
-        checkDiagonal(startRow, startCol, moves, board, startPosition, startColor, -1, 1);
-        checkDiagonal(startRow, startCol, moves, board, startPosition, startColor, -1, 1);
-        checkDiagonal(startRow, startCol, moves, board, startPosition, startColor, -1, -1);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, 1, 1);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, 1, -1);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, -1, 1);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, -1, -1);
 
         return moves;
     }
@@ -98,17 +74,8 @@ public class MoveCalculator {
         return moves;
     }
 
-    public static ArrayList<ChessPosition> rookCoordinateChanges() {
-        ArrayList<ChessPosition> positions = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
-            positions.add(new ChessPosition(0, i));
-            positions.add(new ChessPosition(0, i * -1));
-            positions.add(new ChessPosition(i, 0));
-            positions.add(new ChessPosition(i * -1, 0));
-        }
-        return positions;
-    }
-    public static ArrayList<ChessPosition> knightCoordinateChanges() {
+
+    public static ArrayList<ChessMove> calculateKnightMoves(ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
         ArrayList<ChessPosition> positions = new ArrayList<>();
 
         positions.add(new ChessPosition(1, 2));
@@ -120,16 +87,9 @@ public class MoveCalculator {
         positions.add(new ChessPosition(-2, 1));
         positions.add(new ChessPosition(-1, 2));
 
-        return positions;
+        return checkAbsolutePositions(positions, startPosition, board, startColor);
     }
-
-    public static ArrayList<ChessPosition> bishopCoordinateChanges() {
-        ArrayList<ChessPosition> positions = new ArrayList<>();
-
-        return positions;
-
-    }
-    public static ArrayList<ChessPosition> kingCoordinateChanges() {
+    public static ArrayList<ChessMove> calculateKingMoves(ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
         ArrayList<ChessPosition> positions = new ArrayList<>();
 
         positions.add(new ChessPosition(0, 1));
@@ -141,14 +101,27 @@ public class MoveCalculator {
         positions.add(new ChessPosition(-1, 0));
         positions.add(new ChessPosition(-1, 1));
 
-        return positions;
+        return checkAbsolutePositions(positions, startPosition, board, startColor);
 
     }
-    public static ArrayList<ChessPosition> queenCoordinateChanges() {
-        ArrayList<ChessPosition> positions = new ArrayList<>();
 
-        return positions;
+    public static ArrayList<ChessMove> calculateQueenMoves(ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int startRow = startPosition.getRow();
+        int startCol = startPosition.getColumn();
 
+        //Check vertical/horizontal
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, 1, 0);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, -1, 0);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, 0, 1);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, 0, -1);
+        // Check diagonal
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, 1, 1);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, 1, -1);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, -1, 1);
+        checkLine(startRow, startCol, moves, board, startPosition, startColor, -1, -1);
+
+        return moves;
     }
     public static ArrayList<ChessPosition> pawnCoordinateChanges() {
         ArrayList<ChessPosition> positions = new ArrayList<>();
