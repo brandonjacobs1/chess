@@ -54,12 +54,12 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         return switch (this.pieceType) {
-            case KING -> MoveCalculator.calculateMoves(MoveCalculator.kingCoordinateChanges(), myPosition);
-            case QUEEN -> MoveCalculator.calculateMoves(MoveCalculator.queenCoordinateChanges(), myPosition);
-            case BISHOP -> MoveCalculator.calculateMoves(MoveCalculator.bishopCoordinateChanges(), myPosition);
-            case KNIGHT -> MoveCalculator.calculateMoves(MoveCalculator.knightCoordinateChanges(), myPosition);
-            case ROOK -> MoveCalculator.calculateMoves(MoveCalculator.rookCoordinateChanges(), myPosition);
-            case PAWN -> MoveCalculator.calculateMoves(MoveCalculator.pawnCoordinateChanges(), myPosition);
+            case KING -> MoveCalculator.calculateKingMoves(myPosition, board, this.teamColor);
+            case QUEEN -> MoveCalculator.calculateQueenMoves(myPosition, board, this.teamColor);
+            case BISHOP -> MoveCalculator.calculateBishopMoves(myPosition, board, this.teamColor);
+            case KNIGHT -> MoveCalculator.calculateKnightMoves(myPosition, board, this.teamColor);
+            case ROOK -> MoveCalculator.calculateRookMoves(myPosition, board, this.teamColor);
+            case PAWN -> MoveCalculator.calculatePawnMoves(myPosition, board, this.teamColor);
         };
     }
 
