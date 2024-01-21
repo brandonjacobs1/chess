@@ -131,7 +131,7 @@ public class MoveCalculator {
         positions.add(new ChessPosition(moveMultiplier, 0));
         positions.add(new ChessPosition(2 * moveMultiplier, 0));
         positions.add(new ChessPosition(moveMultiplier, -1 * moveMultiplier));
-        positions.add(new ChessPosition(-1 * moveMultiplier, moveMultiplier));
+        positions.add(new ChessPosition(moveMultiplier, moveMultiplier));
 
         return checkPawnMoves(positions, startPosition, board, startColor);
     }
@@ -184,7 +184,9 @@ public class MoveCalculator {
         return false;
     }
 
-
+    public static boolean isPromotion (ChessPosition end) {
+        return end.getRow() == 1 || end.getRow() == 8;
+    }
     public static ArrayList<ChessMove> checkPawnMoves (ArrayList<ChessPosition> positions, ChessPosition startPosition, ChessBoard board, ChessGame.TeamColor startColor) {
         ArrayList<ChessMove> moves = new ArrayList<>();
 
@@ -196,7 +198,15 @@ public class MoveCalculator {
                 ChessPosition endPosition = new ChessPosition(endRow, endCol);
                 boolean isValid = isValidSpace(startPosition, endPosition, board.getPiece(endPosition), startColor, board);
                 if (isValid) {
-                    moves.add(new ChessMove(startPosition, endPosition, null));
+                    boolean isPromotion = isPromotion(endPosition);
+                    if (isPromotion) {
+                        moves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.BISHOP));
+                        moves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.QUEEN));
+                        moves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.ROOK));
+                        moves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.KNIGHT));
+                    } else {
+                        moves.add(new ChessMove(startPosition, endPosition, null));
+                    }
                 }
             }
         }
