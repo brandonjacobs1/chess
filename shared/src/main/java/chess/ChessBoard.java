@@ -9,10 +9,10 @@ import java.util.Arrays;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private final ChessPiece [][] board;
-
+    ChessPiece [][] board;
     public ChessBoard() {
         this.board = new ChessPiece[8][8];
+
     }
 
     /**
@@ -22,7 +22,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        this.board[position.row - 1][position.col - 1] = piece;
+        this.board[position.getColumn() - 1][position.getRow() - 1] = piece;
     }
 
     /**
@@ -33,14 +33,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        if (position != null) {
-            int row = position.getRow();
-            int col = position.getColumn();
-            ChessPiece piece = this.board[row - 1][col - 1];
-            return piece;
-        } else {
-            return null;
-        }
+        return this.board[position.getColumn() - 1][position.getRow() - 1];
     }
 
     /**
@@ -48,40 +41,36 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        // Define piece types for each team
         ChessPiece.PieceType[] pieces = {
-                ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT,
-                ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.QUEEN,
-                ChessPiece.PieceType.KING, ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.KING, ChessPiece.PieceType.BISHOP,
                 ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK
         };
 
-        for (int col = 1; col < 9; col++) {
-            addPiece(new ChessPosition(1, col), new ChessPiece(ChessGame.TeamColor.WHITE, pieces[col-1]));
-            addPiece(new ChessPosition(8, col), new ChessPiece(ChessGame.TeamColor.BLACK, pieces[col-1]));
-            addPiece(new ChessPosition(2, col), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
-            addPiece(new ChessPosition(7, col), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        for (int col=1; col<9; col++){
+            this.addPiece(new ChessPosition(1, col), new ChessPiece(ChessGame.TeamColor.WHITE, pieces[col-1]));
+            this.addPiece(new ChessPosition(2, col), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            this.addPiece(new ChessPosition(7, col), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+            this.addPiece(new ChessPosition(8, col), new ChessPiece(ChessGame.TeamColor.BLACK, pieces[col-1]));
+
         }
     }
 
-
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-
-        for (int row = 7; row >= 0; row--) {
-            for (int col = 0; col < 8; col++) {
-                ChessPiece piece = this.board[row][col];
-                if (piece != null) {
-                    result.append(piece).append(" ");
+        StringBuilder output = new StringBuilder();
+        for (int row=8; row > 0; row--){
+            for (int col=1; col < 9; col++){
+                ChessPiece piece = getPiece(new ChessPosition(row, col));
+                if (piece != null){
+                    output.append(piece).append(" ");
                 } else {
-                    result.append(" ");
+                    output.append("  ");
                 }
             }
-            result.append("\n");
+            output.append('\n');
         }
-
-        return result.toString();
+        return output.toString();
     }
 
     @Override
@@ -96,6 +85,4 @@ public class ChessBoard {
     public int hashCode() {
         return Arrays.deepHashCode(board);
     }
-
-
 }

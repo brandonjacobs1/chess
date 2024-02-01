@@ -1,7 +1,6 @@
 package chess;
 
-import chess.ChessGame.TeamColor;
-import chess.MoveCalculators.*;
+import chess.MoveCalculator.*;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -13,11 +12,12 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPiece {
-    PieceType pieceType;
-    TeamColor teamColor;
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-        this.pieceType = type;
-        this.teamColor = pieceColor;
+    private final ChessGame.TeamColor color;
+    private final PieceType type;
+
+    public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
+        this.color = pieceColor;
+        this.type = type;
     }
 
     /**
@@ -36,14 +36,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        return this.teamColor;
+        return this.color;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        return this.pieceType;
+        return this.type;
     }
 
     /**
@@ -54,20 +54,19 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return switch (this.pieceType) {
-            case KING -> KingMove.calculateKingMoves(myPosition, board, this.teamColor);
-            case QUEEN -> QueenMove.calculateQueenMoves(myPosition, board, this.teamColor);
-            case BISHOP -> BishopMove.calculateBishopMoves(myPosition, board, this.teamColor);
-            case KNIGHT -> KnightMove.calculateKnightMoves(myPosition, board, this.teamColor);
-            case ROOK -> RookMove.calculateRookMoves(myPosition, board, this.teamColor);
-            case PAWN -> PawnMove.calculatePawnMoves(myPosition, board, this.teamColor);
+        return switch (this.type) {
+            case KING -> KingMoves.getValidMoves(board, myPosition, this.color);
+            case QUEEN -> QueenMoves.getValidMoves(board, myPosition, this.color);
+            case BISHOP -> BishopMoves.getValidMoves(board, myPosition, this.color);
+            case KNIGHT -> KnightMoves.getValidMoves(board, myPosition, this.color);
+            case ROOK -> RookMoves.getValidMoves(board, myPosition, this.color);
+            case PAWN -> PawnMoves.getValidMoves(board, myPosition, this.color);
         };
     }
 
-
     @Override
     public String toString() {
-        String pieceLetter = switch (this.pieceType) {
+        String piece = switch (this.type){
             case KING -> "K";
             case QUEEN -> "Q";
             case BISHOP -> "B";
@@ -75,13 +74,13 @@ public class ChessPiece {
             case ROOK -> "R";
             case PAWN -> "P";
         };
-
-        // Adjust letter case based on team color
-        if (this.teamColor == TeamColor.BLACK) {
-            return pieceLetter.toLowerCase();
+        if (this.color == ChessGame.TeamColor.BLACK) {
+            piece = piece.toLowerCase();
         } else {
-            return pieceLetter.toUpperCase();
+            piece = piece.toUpperCase();
         }
+
+        return piece;
     }
 
     @Override
@@ -89,11 +88,11 @@ public class ChessPiece {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessPiece that = (ChessPiece) o;
-        return pieceType == that.pieceType && teamColor == that.teamColor;
+        return color == that.color && type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pieceType, teamColor);
+        return Objects.hash(color, type);
     }
 }
