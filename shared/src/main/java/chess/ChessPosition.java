@@ -37,7 +37,6 @@ public class ChessPosition {
         return String.format("(%d, %d)", row, col);
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
