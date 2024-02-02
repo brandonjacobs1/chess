@@ -49,7 +49,32 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = board.getPiece(startPosition);
+        var moves = piece.pieceMoves(board, startPosition);
+        ArrayList<ChessMove> validMoves = new ArrayList<>();
+        if (piece != null) {
+            for (ChessMove move : moves){
+                ChessPosition endPosition = move.getEndPosition();
+                ChessPiece endPiece = board.getPiece(endPosition);
+
+                // Test moves
+                board.addPiece(endPosition, piece);
+                board.addPiece(startPosition, null);
+
+                boolean isInCheck = isInCheck(piece.getTeamColor());
+                if (!isInCheck) {
+                    validMoves.add(move);
+                }
+
+                // Reset move
+                board.addPiece(startPosition, piece);
+                board.addPiece(endPosition, endPiece);
+            }
+            return validMoves;
+        } else {
+            return null;
+        }
+
     }
 
     /**
@@ -62,7 +87,7 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(move.getStartPosition());
         ChessPosition endPosition = move.getEndPosition();
         ChessPosition startPosition = move.getStartPosition();
-        var validMoves = piece.pieceMoves(board, move.getStartPosition());
+        var validMoves = validMoves(startPosition);
         if (piece != null) {
             if (teamColor != piece.getTeamColor()) throw new InvalidMoveException("Invalid Move");
 
@@ -74,12 +99,6 @@ public class ChessGame {
                 board.addPiece(endPosition, piece);
                 board.removePiece(startPosition);
 
-
-                if (isInCheck(piece.getTeamColor())) {
-                    board.addPiece(startPosition, piece);
-                    board.removePiece(endPosition);
-                    throw new InvalidMoveException("Invalid Move");
-                }
             } else {
                 throw new InvalidMoveException("Invalid Move");
             }
