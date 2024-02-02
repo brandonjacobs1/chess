@@ -52,6 +52,22 @@ public class ChessBoard {
         return null;
     }
 
+    public ArrayList<ChessPosition> getAllPieces(ChessGame.TeamColor color){
+        ArrayList<ChessPosition> pieces = new ArrayList<>();
+        for (int row=8; row > 0; row--) {
+            for (int col = 1; col < 9; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = getPiece(position);
+                if (piece != null){
+                    if (piece.getTeamColor() == color){
+                       pieces.add(new ChessPosition(row, col));
+                    }
+                }
+            }
+        }
+        return pieces;
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
