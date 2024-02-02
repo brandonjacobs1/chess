@@ -26,10 +26,6 @@ public class ChessBoard {
         this.board[position.getColumn() - 1][position.getRow() - 1] = piece;
     }
 
-    public void removePiece(ChessPosition position){
-        this.board[position.getColumn() - 1][position.getRow() - 1] = null;
-    }
-
     /**
      * Gets a chess piece on the chessboard
      *

@@ -97,7 +97,7 @@ public class ChessGame {
                     piece = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
                 }
                 board.addPiece(endPosition, piece);
-                board.removePiece(startPosition);
+                board.addPiece(startPosition, null);
 
             } else {
                 throw new InvalidMoveException("Invalid Move");
@@ -146,7 +146,14 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        var kingPosition = board.getKingPosition(teamColor);
+        var validMoves = validMoves(kingPosition);
+        boolean isInCheck = isInCheck(teamColor);
+        if(validMoves.isEmpty() && isInCheck) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
