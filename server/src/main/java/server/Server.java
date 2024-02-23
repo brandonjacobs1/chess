@@ -7,6 +7,8 @@ import spark.*;
 import java.util.ArrayList;
 import java.util.Map;
 
+import static spark.Spark.halt;
+
 public class Server {
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -14,6 +16,15 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
+        Spark.before((req, res) -> {
+            if (!req.pathInfo().equals("/user") && !req.pathInfo().equals("/session")) {
+                boolean isAuthenticated = false;
+                if(!isAuthenticated) {
+                    halt(401, "Not authenticated");
+                }
+            }
+        });
+
         Spark.get("/error", this::throwError);
         Spark.get("/data", this::data);
         Spark.get("/badReq", this::badReq);
@@ -41,7 +52,7 @@ public class Server {
         } else if (e instanceof NotAuthenticatedException) {
             statusCode = 401;
         } else if (e instanceof DataAccessException){
-            statusCode = 401;
+            statusCode = 404;
         } else {
             statusCode = 500;
         }
