@@ -20,15 +20,19 @@ public class Server {
             if (!req.pathInfo().equals("/user") && !req.pathInfo().equals("/session")) {
                 boolean isAuthenticated = false;
                 if(!isAuthenticated) {
-                    halt(401, "Not authenticated");
+                    halt(401, "Not authenticated. Please log in.");
                 }
             }
         });
 
-        Spark.get("/error", this::throwError);
-        Spark.get("/data", this::data);
-        Spark.get("/badReq", this::badReq);
-        Spark.get("/noauth", this::noauth);
+        Spark.post("/user", this::registerHandler);
+        Spark.post("/session", this::loginHandler);
+        Spark.delete("/session", this::logoutHandler);
+        Spark.delete("/db", this::clearHandler);
+        Spark.get("/game", this::listGameHandler);
+        Spark.put("/game", this::joinGameHandler);
+        Spark.post("/game", this::createGameHandler);
+
 
         Spark.exception(Exception.class, this::errorHandler);
         Spark.notFound((req, res) -> {
@@ -63,16 +67,31 @@ public class Server {
         res.body(body);
         return body;
     }
-    private Object throwError(Request req, Response res) {
+    private Object registerHandler(Request req, Response res) {
+        // validate body
+
+        // send to service
+
+        // return a response
         throw new RuntimeException("Internal server error");
     }
-    private Object data(Request req, Response res) throws DataAccessException {
-        throw new DataAccessException("Data not found");
+    private Object loginHandler(Request req, Response res) {
+        throw new RuntimeException("Internal server error");
     }
-    private Object badReq(Request req, Response res) throws BadRequestException {
-        throw new BadRequestException("Bad request");
+    private Object logoutHandler(Request req, Response res) {
+        throw new RuntimeException("Internal server error");
     }
-    private Object noauth(Request req, Response res) throws NotAuthenticatedException {
-        throw new NotAuthenticatedException("Not authenticated");
+    private Object clearHandler(Request req, Response res) {
+        throw new RuntimeException("Internal server error");
     }
+    private Object createGameHandler(Request req, Response res) {
+        throw new RuntimeException("Internal server error");
+    }
+    private Object listGameHandler(Request req, Response res) {
+        throw new RuntimeException("Internal server error");
+    }
+    private Object joinGameHandler(Request req, Response res) {
+        throw new RuntimeException("Internal server error");
+    }
+
 }
