@@ -2,6 +2,9 @@ package server;
 
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
+import model.AuthData;
+import model.UserData;
+import service.UserService;
 import spark.*;
 
 import java.util.ArrayList;
@@ -10,6 +13,8 @@ import java.util.Map;
 import static spark.Spark.halt;
 
 public class Server {
+    UserService userService = new UserService();
+    Gson serializer = new Gson();
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
@@ -67,13 +72,19 @@ public class Server {
         res.body(body);
         return body;
     }
-    private Object registerHandler(Request req, Response res) {
-        // validate body
-
-        // send to service
-
-        // return a response
-        throw new RuntimeException("Internal server error");
+    private Object registerHandler(Request req, Response res) throws DataAccessException {
+        try {
+            // validate body
+            UserData user = serializer.fromJson(req.body(), UserData.class);
+            // send to service
+            AuthData authData = userService.register(user);
+            // return a response
+            return serializer.toJson(authData);
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Internal server error");
+        }
     }
     private Object loginHandler(Request req, Response res) {
         throw new RuntimeException("Internal server error");
