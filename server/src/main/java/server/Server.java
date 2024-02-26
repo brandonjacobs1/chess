@@ -7,7 +7,12 @@ import model.UserData;
 import service.UserService;
 import spark.*;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static spark.Spark.halt;
@@ -72,23 +77,82 @@ public class Server {
         res.body(body);
         return body;
     }
-    private Object registerHandler(Request req, Response res) throws DataAccessException {
+
+    private void validateBody(Record data, List<String> dataKeys) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, BadRequestException {
+        ArrayList<String> emptyItems = new ArrayList<>();
+        for(String key : dataKeys) {
+            Method getter = data.getClass().getMethod(key);
+            Object value = getter.invoke(data);
+            if (value == null) {
+                emptyItems.add(key);
+            }
+        }
+        if (!emptyItems.isEmpty()) {
+            throw new BadRequestException(generateInvalidBodyErrorMessage(emptyItems));
+        }
+    }
+
+    private String generateInvalidBodyErrorMessage(ArrayList<String> missingKeys) {
+        StringBuilder message = new StringBuilder("Missing ");
+        if (missingKeys.size() == 1) {
+            message.append(missingKeys.getFirst());
+        } else if (missingKeys.size() == 2) {
+            message.append(missingKeys.get(0)).append(" and ").append(missingKeys.get(1));
+        } else {
+            for (int i = 0; i < missingKeys.size(); i++) {
+                message.append(missingKeys.get(i));
+                if (i < missingKeys.size() - 2) {
+                    message.append(", ");
+                } else if (i == missingKeys.size() - 2) {
+                    message.append(", and ");
+                }
+            }
+        }
+        message.append(" in request body.");
+        return message.toString();
+    }
+
+    private Object registerHandler(Request req, Response res) throws DataAccessException, BadRequestException {
         try {
             // validate body
-            UserData user = serializer.fromJson(req.body(), UserData.class);
+            UserData user;
+            try {
+                user = serializer.fromJson(req.body(), UserData.class);
+            } catch (Exception e) {
+                throw new BadRequestException("There was an error in your JSON body");
+            }
+            List<String> keysToValidate = Arrays.asList("username", "password", "email");
+            validateBody(user, keysToValidate);
             // send to service
             AuthData authData = userService.register(user);
             // return a response
             return serializer.toJson(authData);
-        } catch (DataAccessException e) {
+        } catch (DataAccessException | BadRequestException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Internal server error");
         }
     }
-    private Object loginHandler(Request req, Response res) {
-        throw new RuntimeException("Internal server error");
-    }
+    private Object loginHandler(Request req, Response res) throws BadRequestException, DataAccessException {
+        try {
+            // validate body
+            UserData user;
+            try {
+                user = serializer.fromJson(req.body(), UserData.class);
+            } catch (Exception e) {
+                throw new BadRequestException("There was an error in your JSON body");
+            }
+            List<String> keysToValidate = Arrays.asList("username", "password");
+            validateBody(user, keysToValidate);
+            // send to service
+            AuthData authData = userService.login(user);
+            // return a response
+            return serializer.toJson(authData);
+        } catch (DataAccessException | BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Internal server error");
+        }    }
     private Object logoutHandler(Request req, Response res) {
         throw new RuntimeException("Internal server error");
     }

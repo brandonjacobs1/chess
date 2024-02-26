@@ -13,9 +13,11 @@ public class UserService {
     IAuthDAO authDAO = new MemoryAuthDAO();
     public AuthData register(UserData user) throws DataAccessException {
         userDAO.createUser(user);
-        AuthData authData = authDAO.createAuth(user);
-        return authData;
+        return authDAO.upsertAuth(user);
     }
-//    public AuthData login(UserData user) {}
+    public AuthData login(UserData user) throws DataAccessException {
+        user = userDAO.getUser(user);
+        return authDAO.upsertAuth(user);
+    }
 //    public void logout(UserData user) {}
 }

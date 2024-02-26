@@ -5,20 +5,14 @@ import dataAccess.Interfaces.IAuthDAO;
 import model.AuthData;
 import model.UserData;
 
-import java.util.ArrayList;
-import java.util.UUID;
+import java.util.*;
 
 public class MemoryAuthDAO implements IAuthDAO {
-    ArrayList<AuthData> auths = new ArrayList<>();
-    public AuthData createAuth(UserData user) throws DataAccessException {
+    HashMap<String, AuthData> auths = new HashMap<>();
+    public AuthData upsertAuth(UserData user) {
         String authToken = UUID.randomUUID().toString();
-        AuthData authData = new AuthData(authToken, user.username());
-        auths.add(authData);
-        return authData;
-    }
-
-    public AuthData getAuth() throws DataAccessException {
-        return null;
+        auths.put(user.username(), new AuthData(authToken, user.username()));
+        return auths.get(user.username());
     }
 
     public void deleteAuth() throws DataAccessException {
