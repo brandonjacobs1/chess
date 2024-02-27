@@ -19,36 +19,24 @@ public class MemoryAuthDAO implements IAuthDAO {
     }
     public AuthData createAuth(UserData user) {
         String authToken = UUID.randomUUID().toString();
-        auths.put(user.username(), new AuthData(authToken, user.username()));
-        return auths.get(user.username());
+        auths.put(authToken, new AuthData(authToken, user.username()));
+        return auths.get(authToken);
     }
 
-    public AuthData getAuth(String token){
-        String username = getUsernameByToken(token);
-        return auths.get(username);
-    }
-
-    public void deleteAuth(String authToken) throws DataAccessException {
-        String usernameToRemove = getUsernameByToken(authToken);
-
-        if (usernameToRemove != null) {
-            auths.remove(usernameToRemove);
+    public AuthData getAuth(String token) throws DataAccessException {
+        AuthData auth = auths.get(token);
+        if (auth == null) {
+            throw new DataAccessException("User not found");
         }
+        return auth;
+    }
+
+    public void deleteAuth(String authToken) {
+         auths.remove(authToken);
     }
 
     public void clear() {
         auths.clear();
     }
 
-    private String getUsernameByToken(String token){
-        String usernameToRemove = null;
-        for (Map.Entry<String, AuthData> entry : auths.entrySet()) {
-            if (entry.getValue().authToken().equals(token)) {
-                usernameToRemove = entry.getKey();
-                break;
-            }
-        }
-        return usernameToRemove;
-
-    }
 }

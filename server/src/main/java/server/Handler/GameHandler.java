@@ -5,12 +5,11 @@ import model.GameData;
 import model.JoinGameBody;
 import model.UserData;
 import server.BadRequestException;
+import service.DuplicateEntryException;
 import spark.Request;
 import spark.Response;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class GameHandler extends APIHandler{
     public Object createGameHandler(Request req, Response res) throws BadRequestException, DataAccessException {
@@ -22,11 +21,10 @@ public class GameHandler extends APIHandler{
             } catch (Exception e) {
                 throw new BadRequestException("There was an error in your JSON body");
             }
-            List<String> keysToValidate = Arrays.asList("gameName");
+            List<String> keysToValidate = List.of("gameName");
             validateBody(game, keysToValidate);
             // send to service
-            UserData user = userService.getUser(req.headers("authorization"));
-            GameData newGame = gameService.createGame(game, user);
+            GameData newGame = gameService.createGame(game);
             // return a response
             return serializer.toJson(newGame);
         } catch (DataAccessException | BadRequestException e) {
@@ -39,15 +37,18 @@ public class GameHandler extends APIHandler{
         try {
             // send to service
             ArrayList<GameData> games = gameService.listGames();
+            Map<String, ArrayList<GameData>> responseMap = new HashMap<>();
+            responseMap.put("games", games);
+
             // return a response
-            return serializer.toJson(games);
+            return serializer.toJson(responseMap);
         } catch (DataAccessException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Internal server error");
         }
     }
-    public Object joinGameHandler(Request req, Response res) throws BadRequestException, DataAccessException {
+    public Object joinGameHandler(Request req, Response res) throws BadRequestException, DataAccessException, DuplicateEntryException {
         try {
             // validate body
             JoinGameBody body;
@@ -56,14 +57,14 @@ public class GameHandler extends APIHandler{
             } catch (Exception e) {
                 throw new BadRequestException("There was an error in your JSON body");
             }
-            List<String> keysToValidate = Arrays.asList("playerColor", "gameID");
+            List<String> keysToValidate = List.of("gameID");
             validateBody(body, keysToValidate);
             // send to service
             UserData user = userService.getUser(req.headers("authorization"));
             gameService.joinGame(user, body.gameID(), body.playerColor());
             // return a response
             return "{}";
-        } catch (DataAccessException | BadRequestException e) {
+        } catch (DataAccessException | BadRequestException | DuplicateEntryException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Internal server error");

@@ -1,10 +1,8 @@
 package server;
+
 import server.Handler.*;
 import spark.*;
-
 import java.util.*;
-
-import static spark.Spark.halt;
 
 public class Server {
     UserHandler userHandler;
@@ -25,10 +23,10 @@ public class Server {
 
         // Authenticate all routes that require authentication
         Spark.before((req, res) -> {
-            if (!req.pathInfo().equals("/user") && !(req.pathInfo().equals("/session") && Objects.equals(req.requestMethod(), "POST"))) {
+            if (!req.pathInfo().equals("/user") && !req.pathInfo().equals("/db") && !(req.pathInfo().equals("/session") && Objects.equals(req.requestMethod(), "POST"))) {
                 boolean isAuthenticated = userHandler.authenticate(req.headers("authorization"));
                 if(!isAuthenticated) {
-                    halt(401, "Not authenticated. Please log in.");
+                    throw new NotAuthenticatedException("unauthorized");
                 }
             }
         });
@@ -43,9 +41,7 @@ public class Server {
         Spark.post("/game", (req, res) -> gameHandler.createGameHandler(req, res));
 
         // Handle exceptions
-        Spark.exception(Exception.class, (exception, request, response) -> {
-            errorHandler.errorHandler(exception, request, response);
-        });
+        Spark.exception(Exception.class, (exception, request, response) -> errorHandler.errorHandler(exception, request, response));
 
         // Handle routes not found
         Spark.notFound((req, res) -> {

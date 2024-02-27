@@ -7,6 +7,7 @@ import dataAccess.MemoryAccess.MemoryAuthDAO;
 import dataAccess.MemoryAccess.MemoryUserDAO;
 import model.AuthData;
 import model.UserData;
+import server.NotAuthenticatedException;
 
 public class UserService {
     IUserDAO userDAO;
@@ -16,24 +17,40 @@ public class UserService {
         authDAO = MemoryAuthDAO.getInstance();
         userDAO = MemoryUserDAO.getInstance();
     }
-    public AuthData register(UserData user) throws DataAccessException {
-        userDAO.createUser(user);
-        return authDAO.createAuth(user);
+    public AuthData register(UserData user) throws DuplicateEntryException {
+        try {
+            userDAO.createUser(user);
+            return authDAO.createAuth(user);
+        } catch (DataAccessException e) {
+            throw new DuplicateEntryException("User already exists");
+        }
     }
-    public AuthData login(UserData user) throws DataAccessException {
-        user = userDAO.checkPassword(user);
-        return authDAO.createAuth(user);
+    public AuthData login(UserData user) throws NotAuthenticatedException {
+        try {
+            user = userDAO.checkPassword(user);
+            return authDAO.createAuth(user);
+        }  catch (DataAccessException e) {
+            throw new NotAuthenticatedException(e.getMessage());
+        }
     }
-    public void logout(String authToken) throws DataAccessException {
-     authDAO.deleteAuth(authToken);
+    public void logout(String authToken) {
+        authDAO.deleteAuth(authToken);
     }
-    public boolean authenticate(String token) {
-        AuthData auth = authDAO.getAuth(token);
-        return auth != null;
+    public boolean authenticate(String token) throws NotAuthenticatedException {
+        try {
+            AuthData auth = authDAO.getAuth(token);
+            return auth != null;
+        } catch (DataAccessException e) {
+            throw new NotAuthenticatedException(e.getMessage());
+        }
     }
-    public UserData getUser(String token) throws DataAccessException {
-        AuthData auth = authDAO.getAuth(token);
-        return userDAO.getUser(auth.username());
+    public UserData getUser(String token) throws NotAuthenticatedException {
+        try {
+            AuthData auth = authDAO.getAuth(token);
+            return userDAO.getUser(auth.username());
+        } catch (DataAccessException e) {
+            throw new NotAuthenticatedException(e.getMessage());
+        }
     }
     public void clear() {
         userDAO.clear();

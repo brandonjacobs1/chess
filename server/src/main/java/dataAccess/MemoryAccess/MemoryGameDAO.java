@@ -3,13 +3,12 @@ package dataAccess.MemoryAccess;
 import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IGameDAO;
 import model.GameData;
-
-import java.util.ArrayList;
+import server.BadRequestException;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class MemoryGameDAO implements IGameDAO {
-    HashMap<Integer, GameData> games = new HashMap<>();
+    HashMap<Integer, GameData> games;
+
     private static MemoryGameDAO gameDAO;
     public static MemoryGameDAO getInstance() {
         if (gameDAO == null) {
@@ -17,14 +16,14 @@ public class MemoryGameDAO implements IGameDAO {
         }
         return gameDAO;
     }
-    int counter = 0;
+    int counter;
 
     public MemoryGameDAO() {
         games = new HashMap<>();
         counter = 0;
     }
     public GameData createGame(GameData game) throws DataAccessException {
-        int gameID = counter++;
+        int gameID = ++counter;
         game = new GameData(gameID, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
         if (!games.containsKey(gameID)) {
             try {
@@ -37,13 +36,12 @@ public class MemoryGameDAO implements IGameDAO {
             throw new DataAccessException("Game already exists");
         }
     }
-    public GameData updateGame(GameData game) {
-        try {
+    public void updateGame(GameData game) throws BadRequestException {
+        if (games.containsKey(game.gameID())) {
             games.put(game.gameID(), game);
-        } catch (Exception e) {
-            throw new RuntimeException("Could not update game");
+        } else {
+            throw new BadRequestException("Game ID does not exist");
         }
-        return game;
     }
 
     public HashMap<Integer, GameData> listGames() throws DataAccessException{
@@ -53,10 +51,10 @@ public class MemoryGameDAO implements IGameDAO {
             return games;
         }
     }
-    public GameData getGame(int gameID) throws DataAccessException{
+    public GameData getGame(int gameID) throws BadRequestException {
         GameData game =  games.get(gameID);
         if (game == null) {
-            throw new DataAccessException("Game not found");
+            throw new BadRequestException("Game not found");
         }
         return game;
     }
