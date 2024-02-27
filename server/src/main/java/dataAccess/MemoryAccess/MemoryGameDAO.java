@@ -58,9 +58,6 @@ public class MemoryGameDAO implements IGameDAO {
         }
         return game;
     }
-//    public void deleteGame(GameData game){
-//        games.remove(game.gameID());
-//    }
     public void clear(){
         games.clear();
     }

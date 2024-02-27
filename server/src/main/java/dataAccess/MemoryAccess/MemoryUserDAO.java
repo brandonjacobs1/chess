@@ -24,10 +24,6 @@ public class MemoryUserDAO implements IUserDAO {
         users.put(user.username(), user);
     }
 
-    public UserData updateUser(UserData user) {
-        return null;
-    }
-
     public UserData checkPassword(UserData user) throws DataAccessException {
         UserData foundUser = users.get(user.username());
         if (foundUser == null) {
@@ -46,11 +42,6 @@ public class MemoryUserDAO implements IUserDAO {
             return user;
         }
     }
-
-//    public void deleteUser(UserData user) {
-//        users.remove(user.username());
-//    }
-
     public void clear() {
         users.clear();
     }

@@ -10,7 +10,6 @@ public interface IGameDAO {
     void updateGame(GameData game) throws BadRequestException;
     HashMap<Integer, GameData> listGames() throws DataAccessException;
     GameData getGame(int gameID) throws DataAccessException, BadRequestException;
-//    void deleteGame(GameData game);
     void clear();
 
 
