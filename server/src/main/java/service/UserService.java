@@ -16,7 +16,7 @@ public class UserService {
         return authDAO.createAuth(user);
     }
     public AuthData login(UserData user) throws DataAccessException {
-        user = userDAO.getUser(user);
+        user = userDAO.checkPassword(user);
         return authDAO.createAuth(user);
     }
     public void logout(String authToken) throws DataAccessException {
@@ -25,5 +25,9 @@ public class UserService {
     public boolean authenticate(String token) {
         AuthData auth = authDAO.getAuth(token);
         return auth != null;
+    }
+    public UserData getUser(String token) throws DataAccessException {
+        AuthData auth = authDAO.getAuth(token);
+        return userDAO.getUser(auth.username());
     }
 }

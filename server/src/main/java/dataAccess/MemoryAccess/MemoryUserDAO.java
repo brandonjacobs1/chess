@@ -20,7 +20,7 @@ public class MemoryUserDAO implements IUserDAO {
         return null;
     }
 
-    public UserData getUser(UserData user) throws DataAccessException {
+    public UserData checkPassword(UserData user) throws DataAccessException {
         UserData foundUser = users.get(user.username());
         if (foundUser == null) {
             throw new DataAccessException("User not found");
@@ -28,6 +28,15 @@ public class MemoryUserDAO implements IUserDAO {
             throw new DataAccessException("Password did not match");
         }
         return foundUser;
+    }
+
+    public UserData getUser(String username) throws DataAccessException {
+        UserData user = users.get(username);
+        if (user == null) {
+            throw new DataAccessException("User does not exist");
+        } else {
+            return user;
+        }
     }
 
 //    public void deleteUser(UserData user) {

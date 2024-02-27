@@ -4,14 +4,15 @@ import dataAccess.DataAccessException;
 import model.GameData;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public interface IGameDAO {
-    public GameData createGame() throws DataAccessException;
-    public GameData joinGame() throws DataAccessException;
-    public ArrayList<GameData> listGames() throws DataAccessException;
-    public GameData updateGame() throws DataAccessException;
-    public void deleteGame();
-    public void clear();
+    GameData createGame(GameData game) throws DataAccessException;
+    GameData updateGame(GameData game);
+    HashMap<Integer, GameData> listGames() throws DataAccessException;
+    GameData getGame(int gameID) throws DataAccessException;
+//    void deleteGame(GameData game);
+    void clear();
 
 
 }
