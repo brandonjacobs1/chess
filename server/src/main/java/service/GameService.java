@@ -16,12 +16,12 @@ public class GameService {
     public GameService() {
         gameDAO = MemoryGameDAO.getInstance();
     }
-    public ArrayList<GameData> listGames() throws DataAccessException {
+    public ArrayList<GameData> listGames() {
         HashMap<Integer,GameData> games =  gameDAO.listGames();
         return new ArrayList<>(games.values());
     }
     public GameData createGame(GameData game) throws DataAccessException {
-        game = new GameData(null, null, null, game.gameName(), null);
+        game = new GameData(game.gameID(), null, null, game.gameName(), null);
         game = gameDAO.createGame(game);
         return game;
     }

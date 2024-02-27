@@ -23,18 +23,13 @@ public class MemoryGameDAO implements IGameDAO {
         counter = 0;
     }
     public GameData createGame(GameData game) throws DataAccessException {
-        int gameID = ++counter;
-        game = new GameData(gameID, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
-        if (!games.containsKey(gameID)) {
-            try {
-                games.put(gameID, game);
-            } catch (Exception e) {
-                throw new RuntimeException("Could not create game");
-            }
-            return game;
-        } else {
+        if (games.containsKey(game.gameID())) {
             throw new DataAccessException("Game already exists");
         }
+        int gameID = ++counter;
+        game = new GameData(gameID, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+        games.put(gameID, game);
+        return game;
     }
     public void updateGame(GameData game) throws BadRequestException {
         if (games.containsKey(game.gameID())) {
@@ -44,12 +39,8 @@ public class MemoryGameDAO implements IGameDAO {
         }
     }
 
-    public HashMap<Integer, GameData> listGames() throws DataAccessException{
-        if (games == null) {
-            throw new DataAccessException("There are no games");
-        } else {
+    public HashMap<Integer, GameData> listGames() {
             return games;
-        }
     }
     public GameData getGame(int gameID) throws BadRequestException {
         GameData game =  games.get(gameID);

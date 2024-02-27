@@ -33,20 +33,14 @@ public class GameHandler extends APIHandler{
             throw new RuntimeException("Internal server error");
         }
     }
-    public Object listGameHandler(Request req, Response res) throws DataAccessException {
-        try {
-            // send to service
-            ArrayList<GameData> games = gameService.listGames();
-            Map<String, ArrayList<GameData>> responseMap = new HashMap<>();
-            responseMap.put("games", games);
+    public Object listGameHandler(Request req, Response res) {
+        // send to service
+        ArrayList<GameData> games = gameService.listGames();
+        Map<String, ArrayList<GameData>> responseMap = new HashMap<>();
+        responseMap.put("games", games);
 
-            // return a response
-            return serializer.toJson(responseMap);
-        } catch (DataAccessException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Internal server error");
-        }
+        // return a response
+        return serializer.toJson(responseMap);
     }
     public Object joinGameHandler(Request req, Response res) throws BadRequestException, DataAccessException, DuplicateEntryException {
         try {
