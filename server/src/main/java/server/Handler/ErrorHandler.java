@@ -14,24 +14,18 @@ public class ErrorHandler {
     public Object errorHandler(Exception e, Request req, Response res) {
         String message;
         int statusCode;
-        switch (e) {
-            case BadRequestException badRequestException -> {
-                message = String.format("Error: %s", "bad request");
-                statusCode = 400;
-            }
-            case NotAuthenticatedException notAuthenticatedException -> {
-                message = String.format("Error: %s", "unauthorized");
-                statusCode = 401;
-            }
-            case DuplicateEntryException duplicateEntryException -> {
-                message = String.format("Error: %s", "already taken");
-                statusCode = 403;
-            }
-            case null, default -> {
-                assert e != null;
-                message = String.format("Error: %s", e.getMessage());
-                statusCode = 500;
-            }
+        if (e instanceof BadRequestException) {
+            message = String.format("Error: %s", "bad request");
+            statusCode = 400;
+        } else if (e instanceof NotAuthenticatedException) {
+            message = String.format("Error: %s", "unauthorized");
+            statusCode = 401;
+        } else if (e instanceof DuplicateEntryException){
+            message = String.format("Error: %s", "already taken");
+            statusCode = 403;
+        } else {
+            message = String.format("Error: %s", e.getMessage());
+            statusCode = 500;
         }
 
         var body = new Gson().toJson(Map.of("message", message, "success", false));
