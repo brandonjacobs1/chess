@@ -175,7 +175,9 @@ public class Server {
         }
     }
     private Object clearHandler(Request req, Response res) {
-        throw new RuntimeException("Internal server error");
+        userService.clear();
+        gameService.clear();
+        return "{}";
     }
     private Object createGameHandler(Request req, Response res) throws BadRequestException, DataAccessException {
         try {

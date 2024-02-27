@@ -1,6 +1,5 @@
 package service;
 
-import chess.ChessGame;
 import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IGameDAO;
 import dataAccess.MemoryAccess.MemoryGameDAO;
@@ -10,7 +9,6 @@ import model.UserData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.UUID;
 
 public class GameService {
     IGameDAO gameDAO;
@@ -26,7 +24,7 @@ public class GameService {
         game = gameDAO.createGame(game);
         return game;
     };
-    public GameData joinGame(UserData user, int gameID, JoinGameBody.Color color) throws Exception {
+    public void joinGame(UserData user, int gameID, JoinGameBody.Color color) throws Exception {
         GameData game = gameDAO.getGame(gameID);
         if (color == JoinGameBody.Color.WHITE && game.whiteUsername() == null) {
             game = new GameData(gameID, user.username(), game.blackUsername(), game.gameName(), game.game());
@@ -36,6 +34,8 @@ public class GameService {
             throw new Exception("new exception");
         }
         gameDAO.updateGame(game);
-        return game;
     };
+    public void clear() {
+        gameDAO.clear();
+    }
 }

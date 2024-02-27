@@ -30,4 +30,8 @@ public class UserService {
         AuthData auth = authDAO.getAuth(token);
         return userDAO.getUser(auth.username());
     }
+    public void clear() {
+        userDAO.clear();
+        authDAO.clear();
+    }
 }
