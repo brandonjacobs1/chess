@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class GameService {
     IGameDAO gameDAO;
     public GameService() {
-        this.gameDAO = new MemoryGameDAO();
+        gameDAO = MemoryGameDAO.getInstance();
     }
     public ArrayList<GameData> listGames() throws DataAccessException {
         HashMap<Integer,GameData> games =  gameDAO.listGames();

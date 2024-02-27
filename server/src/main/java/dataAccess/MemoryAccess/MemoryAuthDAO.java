@@ -9,6 +9,14 @@ import java.util.*;
 
 public class MemoryAuthDAO implements IAuthDAO {
     HashMap<String, AuthData> auths = new HashMap<>();
+
+    private static MemoryAuthDAO authDAO;
+    public static MemoryAuthDAO getInstance() {
+        if (authDAO == null) {
+            authDAO = new MemoryAuthDAO();
+        }
+        return authDAO;
+    }
     public AuthData createAuth(UserData user) {
         String authToken = UUID.randomUUID().toString();
         auths.put(user.username(), new AuthData(authToken, user.username()));

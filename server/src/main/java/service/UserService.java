@@ -9,8 +9,13 @@ import model.AuthData;
 import model.UserData;
 
 public class UserService {
-    IUserDAO userDAO = new MemoryUserDAO();
-    IAuthDAO authDAO = new MemoryAuthDAO();
+    IUserDAO userDAO;
+    IAuthDAO authDAO;
+
+    public UserService() {
+        authDAO = MemoryAuthDAO.getInstance();
+        userDAO = MemoryUserDAO.getInstance();
+    }
     public AuthData register(UserData user) throws DataAccessException {
         userDAO.createUser(user);
         return authDAO.createAuth(user);

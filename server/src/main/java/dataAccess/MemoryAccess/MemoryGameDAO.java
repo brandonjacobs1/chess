@@ -10,6 +10,13 @@ import java.util.Objects;
 
 public class MemoryGameDAO implements IGameDAO {
     HashMap<Integer, GameData> games = new HashMap<>();
+    private static MemoryGameDAO gameDAO;
+    public static MemoryGameDAO getInstance() {
+        if (gameDAO == null) {
+            gameDAO = new MemoryGameDAO();
+        }
+        return gameDAO;
+    }
     int counter = 0;
 
     public MemoryGameDAO() {

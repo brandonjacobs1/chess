@@ -1,12 +1,13 @@
 package dataAccess.Interfaces;
 
 import dataAccess.DataAccessException;
+import dataAccess.MemoryAccess.MemoryAuthDAO;
 import model.AuthData;
 import model.UserData;
 
 public interface IAuthDAO {
-    public AuthData createAuth(UserData user);
-    public AuthData getAuth(String token);
-    public void deleteAuth(String authToken) throws DataAccessException;
-    public void clear();
+    AuthData createAuth(UserData user);
+    AuthData getAuth(String token);
+    void deleteAuth(String authToken) throws DataAccessException;
+    void clear();
 }
