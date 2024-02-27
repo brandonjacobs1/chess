@@ -13,11 +13,18 @@ public class UserService {
     IAuthDAO authDAO = new MemoryAuthDAO();
     public AuthData register(UserData user) throws DataAccessException {
         userDAO.createUser(user);
-        return authDAO.upsertAuth(user);
+        return authDAO.createAuth(user);
     }
     public AuthData login(UserData user) throws DataAccessException {
         user = userDAO.getUser(user);
-        return authDAO.upsertAuth(user);
+        return authDAO.createAuth(user);
     }
-//    public void logout(UserData user) {}
+    public void logout(String authToken) throws DataAccessException {
+     authDAO.deleteAuth(authToken);
+    }
+
+    public boolean authenticate(String token) {
+        AuthData auth = authDAO.getAuth(token);
+        return auth != null;
+    }
 }

@@ -5,7 +5,8 @@ import model.AuthData;
 import model.UserData;
 
 public interface IAuthDAO {
-    public AuthData upsertAuth(UserData user);
-    public void deleteAuth() throws DataAccessException;
+    public AuthData createAuth(UserData user);
+    public AuthData getAuth(String token);
+    public void deleteAuth(String authToken) throws DataAccessException;
     public void clear();
 }

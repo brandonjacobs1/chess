@@ -10,10 +10,7 @@ import spark.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static spark.Spark.halt;
 
@@ -27,8 +24,9 @@ public class Server {
 
         // Register your endpoints and handle exceptions here.
         Spark.before((req, res) -> {
-            if (!req.pathInfo().equals("/user") && !req.pathInfo().equals("/session")) {
-                boolean isAuthenticated = false;
+            String method = req.requestMethod();
+            if (!req.pathInfo().equals("/user") && !(req.pathInfo().equals("/session") && Objects.equals(req.requestMethod(), "POST"))) {
+                boolean isAuthenticated = authenticate(req.headers("authorization"));
                 if(!isAuthenticated) {
                     halt(401, "Not authenticated. Please log in.");
                 }
@@ -76,6 +74,10 @@ public class Server {
         res.status(statusCode);
         res.body(body);
         return body;
+    }
+
+    private boolean authenticate(String token) {
+        return userService.authenticate(token);
     }
 
     private void validateBody(Record data, List<String> dataKeys) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, BadRequestException {
@@ -152,9 +154,20 @@ public class Server {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Internal server error");
-        }    }
-    private Object logoutHandler(Request req, Response res) {
-        throw new RuntimeException("Internal server error");
+        }
+    }
+    private Object logoutHandler(Request req, Response res) throws DataAccessException {
+        try {
+            String token = req.headers("authorization");
+            // send to service
+            userService.logout(token);
+            // return a response
+            return "{}";
+        } catch (DataAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Internal server error");
+        }
     }
     private Object clearHandler(Request req, Response res) {
         throw new RuntimeException("Internal server error");
