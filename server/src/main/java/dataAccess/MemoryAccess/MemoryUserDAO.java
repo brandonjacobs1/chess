@@ -4,19 +4,16 @@ import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IUserDAO;
 import model.UserData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.Optional;
 
 public class MemoryUserDAO implements IUserDAO {
     HashMap<String, UserData> users = new HashMap<>();
-    public UserData createUser(UserData user) throws DataAccessException {
+    public void createUser(UserData user) throws DataAccessException {
         if (users.containsKey(user.username())) {
             throw new DataAccessException("User Already Exists");
         }
         users.put(user.username(), user);
-        return user;
     }
 
     public UserData updateUser(UserData user) {
@@ -33,9 +30,9 @@ public class MemoryUserDAO implements IUserDAO {
         return foundUser;
     }
 
-    public void deleteUser() {
-
-    }
+//    public void deleteUser(UserData user) {
+//        users.remove(user.username());
+//    }
 
     public void clear() {
         users.clear();

@@ -22,7 +22,6 @@ public class UserService {
     public void logout(String authToken) throws DataAccessException {
      authDAO.deleteAuth(authToken);
     }
-
     public boolean authenticate(String token) {
         AuthData auth = authDAO.getAuth(token);
         return auth != null;
