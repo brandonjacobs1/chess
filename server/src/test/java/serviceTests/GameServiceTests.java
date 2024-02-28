@@ -4,6 +4,8 @@ import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IGameDAO;
 import dataAccess.MemoryAccess.MemoryGameDAO;
 import model.GameData;
+import model.JoinGameBody;
+import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,8 +29,9 @@ public class GameServiceTests {
     @Test
     @DisplayName("Test listGames method with 2 games")
     void testListGamesPositive() throws DataAccessException {
-        GameData game1 = new GameData(1, "WhitePlayer1", "BlackPlayer1", "Game1", null);
-        GameData game2 = new GameData(2, "WhitePlayer2", "BlackPlayer2", "Game2", null);
+        gameService.clear();
+        GameData game1 = new GameData(null, "WhitePlayer1", "BlackPlayer1", "Game1", null);
+        GameData game2 = new GameData(null, "WhitePlayer2", "BlackPlayer2", "Game2", null);
         gameService.createGame(game1);
         gameDAO.createGame(game2);
 
@@ -47,7 +50,7 @@ public class GameServiceTests {
 
 
     @Test
-    @DisplayName("Test create game")
+    @DisplayName("Test createGame success")
     public void testCreateGamePositive() throws DataAccessException {
         GameData gameData = new GameData(null, null, null, "Test Game", null);
         GameData game = gameService.createGame(gameData);
@@ -55,45 +58,38 @@ public class GameServiceTests {
     }
 
     @Test
-    @DisplayName("Test create game failure")
+    @DisplayName("Test createGame failure")
     public void testCreateGameNegative() throws DataAccessException {
         GameData gameData = new GameData(null, null, null, "Test Game", null);
         gameService.createGame(gameData);
-        gameData = new GameData(1, null, null, "Test Game", null);
+        gameData = new GameData(2, null, null, "Test Game", null);
 
         GameData finalGameData = gameData;
-        Assertions.assertThrows(DataAccessException.class, () -> {
-            gameService.createGame(finalGameData);
-        });
+        Assertions.assertThrows(DataAccessException.class, () -> gameService.createGame(finalGameData));
     }
 
     @Test
+    @DisplayName("test joinGame success")
     public void testJoinGamePositive() throws DuplicateEntryException, BadRequestException, DataAccessException {
-        // Positive test: Verify that the method successfully joins a user to a game
-        // Implement the test logic according to the requirements
+        GameData gameData = new GameData(null, null, null, "Test Game", null);
+        gameData = gameDAO.createGame(gameData);
+        gameService.joinGame(new UserData("testUser", "testPassword", "testEmail"), gameData.gameID(), JoinGameBody.Color.WHITE);
+
+        assertEquals("testUser", gameDAO.getGame(gameData.gameID()).whiteUsername());
     }
 
     @Test
-    public void testJoinGameNegative1() {
-        // Negative test: Verify that the method throws DuplicateEntryException
-        // Implement the test logic according to the requirements
-    }
+    @DisplayName("test joinGame failure")
+    public void testJoinGameNegative() throws DataAccessException {
+        GameData gameData = new GameData(1, "WhitePlayer", null, "Test Game", null);
+        gameDAO.createGame(gameData);
 
-    @Test
-    public void testJoinGameNegative2() {
-        // Negative test: Verify that the method throws BadRequestException
-        // Implement the test logic according to the requirements
-    }
-
-    @Test
-    public void testJoinGameNegative3() {
-        // Negative test: Verify that the method throws DataAccessException
-        // Implement the test logic according to the requirements
+        assertThrows(DuplicateEntryException.class, () -> gameService.joinGame(new UserData("testUser", "testPassword", "testEmail"), 1, JoinGameBody.Color.WHITE));
     }
 
     @Test
     public void testClear() {
-        // Positive test: Verify that the method clears the game data
-        // Implement the test logic according to the requirements
+        gameDAO.clear();
+        assertTrue(gameDAO.listGames().isEmpty());
     }
 }
