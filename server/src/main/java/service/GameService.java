@@ -7,6 +7,7 @@ import model.GameData;
 import model.JoinGameBody;
 import model.UserData;
 import server.BadRequestException;
+import server.DuplicateEntryException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

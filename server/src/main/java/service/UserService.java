@@ -7,6 +7,7 @@ import dataAccess.MemoryAccess.MemoryAuthDAO;
 import dataAccess.MemoryAccess.MemoryUserDAO;
 import model.AuthData;
 import model.UserData;
+import server.DuplicateEntryException;
 import server.NotAuthenticatedException;
 
 public class UserService {

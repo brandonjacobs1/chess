@@ -5,7 +5,7 @@ import model.GameData;
 import model.JoinGameBody;
 import model.UserData;
 import server.BadRequestException;
-import service.DuplicateEntryException;
+import server.DuplicateEntryException;
 import spark.Request;
 import spark.Response;
 

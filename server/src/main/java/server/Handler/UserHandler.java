@@ -4,7 +4,7 @@ import model.AuthData;
 import model.UserData;
 import server.BadRequestException;
 import server.NotAuthenticatedException;
-import service.DuplicateEntryException;
+import server.DuplicateEntryException;
 import spark.Request;
 import spark.Response;
 

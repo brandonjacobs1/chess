@@ -3,7 +3,7 @@ package server.Handler;
 import com.google.gson.Gson;
 import server.BadRequestException;
 import server.NotAuthenticatedException;
-import service.DuplicateEntryException;
+import server.DuplicateEntryException;
 import spark.Request;
 import spark.Response;
 import java.util.Map;
