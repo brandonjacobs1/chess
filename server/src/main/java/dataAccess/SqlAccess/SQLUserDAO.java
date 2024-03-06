@@ -58,8 +58,9 @@ public class SQLUserDAO implements IUserDAO {
     }
 
     public UserData getUser(String username) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement statement = conn.prepareStatement(SELECT_USER_QUERY)) {
+        Connection conn = DatabaseManager.getConnection();
+        try {
+            PreparedStatement statement = conn.prepareStatement(SELECT_USER_QUERY);
             statement.setString(1, username);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
@@ -73,8 +74,9 @@ public class SQLUserDAO implements IUserDAO {
     }
 
     public void clear() throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement statement = conn.prepareStatement(DELETE_ALL_USERS_QUERY)) {
+        Connection conn = DatabaseManager.getConnection()
+        try {
+            PreparedStatement statement = conn.prepareStatement(DELETE_ALL_USERS_QUERY);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
