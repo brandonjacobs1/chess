@@ -67,4 +67,41 @@ public class DatabaseManager {
             throw new DataAccessException(e.getMessage());
         }
     }
+
+    static void createTables () throws DataAccessException {
+        Connection conn = getConnection();
+        try {
+            var statement = conn.createStatement();
+            statement.execute("CREATE TABLE IF NOT EXISTS users ("
+                    + "username VARCHAR(50) NOT NULL, "
+                    + "password VARCHAR(50) NOT NULL, "
+                    + "email VARCHAR(50) NOT NULL, "
+                    + "PRIMARY KEY (username), "
+                    + "UNIQUE (username))");
+            statement.execute("CREATE TABLE IF NOT EXISTS auth ("
+                    + "username VARCHAR(50) NOT NULL, "
+                    + "token VARCHAR(50) NOT NULL, "
+                    + "PRIMARY KEY (username), "
+                    + "UNIQUE (username))");
+            statement.execute("CREATE TABLE IF NOT EXISTS game ("
+                    + "gameId INT NOT NULL AUTO_INCREMENT, "
+                    + "whiteUsername VARCHAR(50) NOT NULL, "
+                    + "blackUsername VARCHAR(50) NOT NULL, "
+                    + "gameName VARCHAR(50) NOT NULL, "
+                    + "game JSON NOT NULL, "
+                    + "PRIMARY KEY (gameId)) ");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+    public static void setup() throws DataAccessException {
+        try {
+            createDatabase();
+            createTables();
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 }
