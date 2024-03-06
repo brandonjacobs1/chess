@@ -33,7 +33,7 @@ public class GameHandler extends APIHandler{
             throw new RuntimeException("Internal server error");
         }
     }
-    public Object listGameHandler(Request req, Response res) {
+    public Object listGameHandler(Request req, Response res) throws DataAccessException {
         // send to service
         ArrayList<GameData> games = gameService.listGames();
         Map<String, ArrayList<GameData>> responseMap = new HashMap<>();

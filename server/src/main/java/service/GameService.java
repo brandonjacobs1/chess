@@ -3,6 +3,7 @@ package service;
 import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IGameDAO;
 import dataAccess.MemoryAccess.MemoryGameDAO;
+import dataAccess.SqlAccess.SQLGameDAO;
 import model.GameData;
 import model.JoinGameBody;
 import model.UserData;
@@ -15,11 +16,16 @@ import java.util.HashMap;
 public class GameService {
     IGameDAO gameDAO;
     public GameService() {
-        gameDAO = MemoryGameDAO.getInstance();
+        gameDAO = SQLGameDAO.getInstance();
     }
-    public ArrayList<GameData> listGames() {
-        HashMap<Integer,GameData> games =  gameDAO.listGames();
-        return new ArrayList<>(games.values());
+    public ArrayList<GameData> listGames()  {
+        try {
+            HashMap<Integer, GameData> games = gameDAO.listGames();
+            return new ArrayList<>(games.values());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Internal server error");
+        }
     }
     public GameData createGame(GameData game) throws DataAccessException {
         game = new GameData(game.gameID(), null, null, game.gameName(), null);
@@ -39,7 +45,7 @@ public class GameService {
         }
         gameDAO.updateGame(game);
     }
-    public void clear() {
+    public void clear() throws DataAccessException {
         gameDAO.clear();
     }
 }

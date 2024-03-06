@@ -85,10 +85,10 @@ public class DatabaseManager {
                     + "UNIQUE (token))");
             statement.execute("CREATE TABLE IF NOT EXISTS game ("
                     + "gameId INT NOT NULL AUTO_INCREMENT, "
-                    + "whiteUsername VARCHAR(50) NOT NULL, "
-                    + "blackUsername VARCHAR(50) NOT NULL, "
-                    + "gameName VARCHAR(50) NOT NULL, "
-                    + "game JSON NOT NULL, "
+                    + "whiteUsername VARCHAR(50), "
+                    + "blackUsername VARCHAR(50), "
+                    + "gameName VARCHAR(50), "
+                    + "game JSON, "
                     + "PRIMARY KEY (gameId)) ");
         } catch (SQLException e) {
             e.printStackTrace();
