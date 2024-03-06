@@ -81,8 +81,8 @@ public class DatabaseManager {
             statement.execute("CREATE TABLE IF NOT EXISTS auth ("
                     + "username VARCHAR(50) NOT NULL, "
                     + "token VARCHAR(50) NOT NULL, "
-                    + "PRIMARY KEY (username), "
-                    + "UNIQUE (username))");
+                    + "PRIMARY KEY (token), "
+                    + "UNIQUE (token))");
             statement.execute("CREATE TABLE IF NOT EXISTS game ("
                     + "gameId INT NOT NULL AUTO_INCREMENT, "
                     + "whiteUsername VARCHAR(50) NOT NULL, "
