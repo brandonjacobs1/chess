@@ -35,7 +35,11 @@ public class UserService {
         }
     }
     public void logout(String authToken) {
-        authDAO.deleteAuth(authToken);
+        try {
+            authDAO.deleteAuth(authToken);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
     public boolean authenticate(String token) throws NotAuthenticatedException {
         try {
@@ -54,7 +58,10 @@ public class UserService {
         }
     }
     public void clear() {
-        userDAO.clear();
-        authDAO.clear();
+        try {
+            userDAO.clear();
+            authDAO.clear();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());        }
     }
 }
