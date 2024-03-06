@@ -2,6 +2,7 @@ package dataAccess.SqlAccess;
 
 import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IAuthDAO;
+import dataAccess.MemoryAccess.MemoryUserDAO;
 import model.AuthData;
 import model.UserData;
 
@@ -18,6 +19,14 @@ public class SQLAuthDAO implements IAuthDAO {
     private static final String SELECT_AUTH_QUERY = "SELECT * FROM auth WHERE token = ?";
     private static final String DELETE_AUTH_QUERY = "DELETE FROM auth WHERE token = ?";
 
+    private static SQLAuthDAO authDAO;
+    public static SQLAuthDAO getInstance() {
+        if (authDAO == null) {
+            authDAO = new SQLAuthDAO();
+        }
+        return authDAO;
+    }
+
     public AuthData createAuth(UserData user) throws DataAccessException {
         String authToken = UUID.randomUUID().toString();
         try (Connection conn = DatabaseManager.getConnection();
@@ -32,13 +41,14 @@ public class SQLAuthDAO implements IAuthDAO {
     }
 
     public AuthData getAuth(String token) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement statement = conn.prepareStatement(SELECT_AUTH_QUERY)) {
+        Connection conn = DatabaseManager.getConnection();
+        try {
+            PreparedStatement statement = conn.prepareStatement(SELECT_AUTH_QUERY);
             statement.setString(1, token);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return new AuthData(resultSet.getString("token"), resultSet.getString("username"));
-                }
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return new AuthData(resultSet.getString("token"), resultSet.getString("username"));
+            } else {
                 throw new DataAccessException("Auth not found");
             }
         } catch (SQLException e) {

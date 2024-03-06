@@ -11,12 +11,14 @@ public class MemoryUserDAO implements IUserDAO {
     HashMap<String, UserData> users = new HashMap<>();
 
     private static MemoryUserDAO userDAO;
+
     public static MemoryUserDAO getInstance() {
         if (userDAO == null) {
             userDAO = new MemoryUserDAO();
         }
         return userDAO;
     }
+
     public void createUser(UserData user) throws DataAccessException {
         if (users.containsKey(user.username())) {
             throw new DataAccessException("User Already Exists");
@@ -42,6 +44,7 @@ public class MemoryUserDAO implements IUserDAO {
             return user;
         }
     }
+
     public void clear() {
         users.clear();
     }

@@ -5,6 +5,8 @@ import dataAccess.Interfaces.IAuthDAO;
 import dataAccess.Interfaces.IUserDAO;
 import dataAccess.MemoryAccess.MemoryAuthDAO;
 import dataAccess.MemoryAccess.MemoryUserDAO;
+import dataAccess.SqlAccess.SQLUserDAO;
+import dataAccess.SqlAccess.SQLAuthDAO;
 import model.AuthData;
 import model.UserData;
 import server.DuplicateEntryException;
@@ -15,8 +17,8 @@ public class UserService {
     IAuthDAO authDAO;
 
     public UserService() {
-        authDAO = MemoryAuthDAO.getInstance();
-        userDAO = MemoryUserDAO.getInstance();
+        authDAO = SQLAuthDAO.getInstance();
+        userDAO = SQLUserDAO.getInstance();
     }
     public AuthData register(UserData user) throws DuplicateEntryException {
         try {
