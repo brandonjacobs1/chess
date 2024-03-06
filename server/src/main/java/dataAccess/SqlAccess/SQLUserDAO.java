@@ -74,7 +74,7 @@ public class SQLUserDAO implements IUserDAO {
     }
 
     public void clear() throws DataAccessException {
-        Connection conn = DatabaseManager.getConnection()
+        Connection conn = DatabaseManager.getConnection();
         try {
             PreparedStatement statement = conn.prepareStatement(DELETE_ALL_USERS_QUERY);
             statement.executeUpdate();
