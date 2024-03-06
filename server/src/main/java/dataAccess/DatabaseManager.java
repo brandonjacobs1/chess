@@ -74,7 +74,7 @@ public class DatabaseManager {
             var statement = conn.createStatement();
             statement.execute("CREATE TABLE IF NOT EXISTS users ("
                     + "username VARCHAR(50) NOT NULL, "
-                    + "password VARCHAR(50) NOT NULL, "
+                    + "password TEXT NOT NULL, "
                     + "email VARCHAR(50) NOT NULL, "
                     + "PRIMARY KEY (username), "
                     + "UNIQUE (username))");

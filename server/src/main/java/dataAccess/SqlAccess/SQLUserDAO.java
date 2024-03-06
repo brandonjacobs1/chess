@@ -4,18 +4,20 @@ import dataAccess.DataAccessException;
 import dataAccess.DatabaseManager;
 import dataAccess.Interfaces.IUserDAO;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Objects;
 
 public class SQLUserDAO implements IUserDAO {
     private final String INSERT_USER_QUERY = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
     private final String SELECT_USER_QUERY = "SELECT * FROM users WHERE username = ?";
     private final String DELETE_ALL_USERS_QUERY = "DELETE FROM users";
     private static SQLUserDAO userDAO;
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
     public static SQLUserDAO getInstance() {
         if (userDAO == null) {
             userDAO = new SQLUserDAO();
@@ -26,10 +28,11 @@ public class SQLUserDAO implements IUserDAO {
 
     public void createUser(UserData user) throws DataAccessException {
         Connection conn = DatabaseManager.getConnection();
+        String hashedPassword = encoder.encode(user.password());
         try {
             PreparedStatement statement = conn.prepareStatement(INSERT_USER_QUERY);
             statement.setString(1, user.username());
-            statement.setString(2, user.password());
+            statement.setString(2, hashedPassword);
             statement.setString(3, user.email());
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -45,10 +48,11 @@ public class SQLUserDAO implements IUserDAO {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 UserData foundUser = new UserData(resultSet.getString("username"), resultSet.getString("password"), resultSet.getString("email"));
-                if (!Objects.equals(foundUser.password(), user.password())) {
-                    throw new DataAccessException("Password did not match");
+                boolean passwordMatch = encoder.matches(user.password(), foundUser.password());
+                if (passwordMatch) {
+                    return foundUser;
                 }
-                return foundUser;
+                throw new DataAccessException("Password did not match");
             } else {
                 throw new DataAccessException("User not found");
             }
