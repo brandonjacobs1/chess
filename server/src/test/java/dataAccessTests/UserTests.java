@@ -3,9 +3,9 @@ package dataAccessTests;
 import dataAccess.DataAccessException;
 import dataAccess.SqlAccess.SQLUserDAO;
 import model.UserData;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.*;
 
@@ -17,11 +17,11 @@ public class UserTests {
 
     private SQLUserDAO userDAO;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         userDAO = SQLUserDAO.getInstance();
     }
-    @After
+    @AfterEach
     public void tearDown() {
         try {
             userDAO.clear();

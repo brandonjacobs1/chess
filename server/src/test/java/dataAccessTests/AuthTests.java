@@ -4,8 +4,8 @@ import dataAccess.DataAccessException;
 import dataAccess.SqlAccess.SQLAuthDAO;
 import model.AuthData;
 import model.UserData;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,10 +14,10 @@ public class AuthTests {
     private static final String TEST_USERNAME = "test_user";
     private static final String TEST_TOKEN = "test_token";
 
-    private SQLAuthDAO authDAO;
+    private static SQLAuthDAO authDAO;
 
-    @Before
-    public void setUp() {
+    @BeforeAll
+    public static void setUp() {
         authDAO = SQLAuthDAO.getInstance();
     }
 
