@@ -1,10 +1,6 @@
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
 import server.Repl;
-import ui.ChessBoardUI;
 
-public class ClientMain {
+public class Main {
     public static void main(String[] args) {
         var serverUrl = "http://localhost:8080";
         if (args.length == 1) {

@@ -33,6 +33,7 @@ public class ChessClient {
                 case "list" -> listGames();
                 case "join" -> joinGame(params);
                 case "create" -> createGame(params);
+                case "observe" -> observeGame(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -116,6 +117,15 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: <game name>");
     }
 
+    public String observeGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 1) {
+            var gameID = Integer.parseInt(params[0]);
+            return String.format("You are observing game %d.", gameID);
+        }
+        throw new ResponseException(400, "Expected: <game id>");
+    }
+
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
@@ -129,6 +139,7 @@ public class ChessClient {
                     - list
                     - join <game id> <white|black|either>
                     - create <game name>
+                    - observe <game id>
                     - signout
                     - help
                     - quit
