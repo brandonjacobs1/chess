@@ -38,7 +38,7 @@ public class GameService {
             game = new GameData(gameID, user.username(), game.blackUsername(), game.gameName(), game.game());
         } else if (color == JoinGameBody.Color.BLACK && game.blackUsername() == null) {
             game = new GameData(gameID, game.whiteUsername(), user.username(), game.gameName(), game.game());
-        } else if (color == null) {
+        } else if (color == null && game.whiteUsername() == null && game.blackUsername() == null && game.whiteUsername() == null){
             game = new GameData(gameID, null, null, game.gameName(), game.game());
         } else {
             throw new DuplicateEntryException("bad color");

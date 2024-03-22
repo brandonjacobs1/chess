@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 
 import java.io.*;
@@ -11,6 +12,7 @@ import java.util.Map;
 import com.google.gson.reflect.TypeToken;
 import model.AuthData;
 import model.GameData;
+import model.JoinGameBody;
 import model.UserData;
 
 public class ServerFacade {
@@ -42,6 +44,11 @@ public class ServerFacade {
         var path = "/game";
         Type t = new TypeToken<Map<String, ArrayList<GameData>>>(){}.getType();
         return this.makeRequest("GET", path, null, t, auth);
+    }
+
+    public void joinGame(AuthData auth, int gameID, JoinGameBody.Color color) throws ResponseException {
+        var path = "/game";
+        this.makeRequest("PUT", path, new JoinGameBody(color, gameID), null, auth);
     }
 
     private <T> T makeRequest(String method, String path, Object request, Type responseClass, AuthData auth) throws ResponseException {

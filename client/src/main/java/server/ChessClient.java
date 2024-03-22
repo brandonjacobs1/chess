@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import model.AuthData;
 import model.GameData;
+import model.JoinGameBody;
 import model.UserData;
 import server.ServerFacade;
 
@@ -33,7 +35,7 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "signout" -> signOut();
                 case "list" -> listGames();
-//                case "join" -> joinGame();
+                case "join" -> joinGame(params);
 //                case "create" -> createGame(params);
                 case "quit" -> "quit";
                 default -> help();
@@ -88,22 +90,23 @@ public class ChessClient {
         return result.toString();
     }
 
-//
-//    public String adoptPet(String... params) throws ResponseException {
-//        assertSignedIn();
-//        if (params.length == 1) {
-//            try {
-//                var id = Integer.parseInt(params[0]);
-//                var pet = getPet(id);
-//                if (pet != null) {
-//                    server.deletePet(id);
-//                    return String.format("%s says %s", pet.name(), pet.sound());
-//                }
-//            } catch (NumberFormatException ignored) {
-//            }
-//        }
-//        throw new ResponseException(400, "Expected: <pet id>");
-//    }
+
+    public String joinGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 2) {
+        var gameID = Integer.parseInt(params[0]);
+            var playerColor = params[1];
+            JoinGameBody.Color color = null;
+            if (playerColor.equals("white")){
+                color = JoinGameBody.Color.WHITE;
+            } else if (playerColor.equals("black")){
+                color = JoinGameBody.Color.BLACK;
+            }
+            server.joinGame(this.auth, gameID, color);
+            return String.format("You joined game %d.", gameID);
+        }
+        throw new ResponseException(400, "Expected: <game id> <color>");
+    }
 //
 //    public String adoptAllPets() throws ResponseException {
 //        assertSignedIn();
@@ -136,7 +139,7 @@ public class ChessClient {
         } else if (state == State.SIGNEDIN) {
             return """
                     - list
-                    - join
+                    - join <game id> <white|black|either>
                     - create
                     - signout
                     - quit
