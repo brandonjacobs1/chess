@@ -1,5 +1,7 @@
 package service;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IGameDAO;
 import dataAccess.MemoryAccess.MemoryGameDAO;
@@ -34,12 +36,18 @@ public class GameService {
     }
     public void joinGame(UserData user, int gameID, JoinGameBody.Color color) throws DuplicateEntryException, BadRequestException, DataAccessException {
         GameData game = gameDAO.getGame(gameID);
+        ChessGame chessGame = game.game();
+        if (chessGame == null || chessGame.getBoard() == null) {
+            chessGame = new ChessGame();
+            chessGame.setBoard(new ChessBoard());
+            chessGame.getBoard().resetBoard();
+        }
         if (color == JoinGameBody.Color.WHITE && game.whiteUsername() == null) {
-            game = new GameData(gameID, user.username(), game.blackUsername(), game.gameName(), game.game());
+            game = new GameData(gameID, user.username(), game.blackUsername(), game.gameName(), chessGame);
         } else if (color == JoinGameBody.Color.BLACK && game.blackUsername() == null) {
-            game = new GameData(gameID, game.whiteUsername(), user.username(), game.gameName(), game.game());
+            game = new GameData(gameID, game.whiteUsername(), user.username(), game.gameName(), chessGame);
         } else if (color == null && game.whiteUsername() == null && game.blackUsername() == null && game.whiteUsername() == null){
-            game = new GameData(gameID, null, null, game.gameName(), game.game());
+            game = new GameData(gameID, null, null, game.gameName(), chessGame);
         } else {
             throw new DuplicateEntryException("bad color");
         }
