@@ -36,7 +36,7 @@ public class ChessClient {
                 case "signout" -> signOut();
                 case "list" -> listGames();
                 case "join" -> joinGame(params);
-//                case "create" -> createGame(params);
+                case "create" -> createGame(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -107,26 +107,17 @@ public class ChessClient {
         }
         throw new ResponseException(400, "Expected: <game id> <color>");
     }
-//
-//    public String adoptAllPets() throws ResponseException {
-//        assertSignedIn();
-//        var buffer = new StringBuilder();
-//        for (var pet : server.listPets()) {
-//            buffer.append(String.format("%s says %s%n", pet.name(), pet.sound()));
-//        }
-//
-//        server.deleteAllPets();
-//        return buffer.toString();
-//    }
 
-//    private Pet getPet(int id) throws ResponseException {
-//        for (var pet : server.listPets()) {
-//            if (pet.id() == id) {
-//                return pet;
-//            }
-//        }
-//        return null;
-//    }
+    public String createGame(String... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 1) {
+            var gameName = params[0];
+            var game = new GameData(null, null, null, gameName, new ChessGame());
+            var newGame = server.createGame(this.auth, game);
+            return String.format("You created game %d: %s", newGame.gameID(), newGame.gameName());
+        }
+        throw new ResponseException(400, "Expected: <game name>");
+    }
 
     public String help() {
         if (state == State.SIGNEDOUT) {
@@ -140,7 +131,7 @@ public class ChessClient {
             return """
                     - list
                     - join <game id> <white|black|either>
-                    - create
+                    - create <game name>
                     - signout
                     - quit
                     """;
