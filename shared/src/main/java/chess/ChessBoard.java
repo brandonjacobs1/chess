@@ -13,7 +13,10 @@ public class ChessBoard {
     ChessPiece [][] board;
     public ChessBoard() {
         this.board = new ChessPiece[8][8];
+    }
 
+    public ChessPiece [][] getBoard(){
+        return this.board;
     }
 
     /**
