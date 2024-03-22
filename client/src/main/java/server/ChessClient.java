@@ -2,16 +2,12 @@ package server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
 import model.AuthData;
 import model.GameData;
 import model.JoinGameBody;
 import model.UserData;
-import server.ServerFacade;
 
 public class ChessClient {
     private String visitorName = null;
