@@ -103,6 +103,7 @@ public class ChessClient {
                 color = JoinGameBody.Color.BLACK;
             }
             server.joinGame(this.auth, gameID, color);
+            state = State.PLAYING;
             return String.format("You joined game %d.", gameID);
         }
         throw new ResponseException(400, "Expected: <game id> <color>");
@@ -133,12 +134,15 @@ public class ChessClient {
                     - join <game id> <white|black|either>
                     - create <game name>
                     - signout
+                    - help
                     - quit
                     """;
 
         }
         return """
                 - game stuff
+                - help
+                - quit
                 """;
     }
 
