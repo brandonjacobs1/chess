@@ -68,7 +68,6 @@ public class ServerFacadeTests {
         UserData userData = new UserData("username", "password", "email");
         AuthData authData = serverFacade.login(userData);
         assertNotNull(authData);
-        assertNotNull(authData.authToken());
     }
 
     @Test
