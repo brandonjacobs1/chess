@@ -3,11 +3,13 @@ package server;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.JoinGameBody;
 import model.UserData;
+import ui.ChessBoardUI;
 
 public class ChessClient {
     private String visitorName = null;
@@ -15,6 +17,7 @@ public class ChessClient {
     private final String serverUrl;
     private AuthData auth;
     private State state = State.SIGNEDOUT;
+    private ArrayList<GameData> games = new ArrayList<>();
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -34,6 +37,7 @@ public class ChessClient {
                 case "join" -> joinGame(params);
                 case "create" -> createGame(params);
                 case "observe" -> observeGame(params);
+                case "leave" -> leaveGame();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -79,19 +83,23 @@ public class ChessClient {
         assertSignedIn();
         var gameMap = this.server.listGames(this.auth);
         ArrayList<GameData> games = gameMap.get("games");
+        this.games = games;
         var result = new StringBuilder();
+        int counter = 0;
         for (GameData game : games) {
-            // Append the game name if the game map contains the "gameName" key
-            result.append(game.gameID()).append(": ").append(game.gameName()).append("\n");
-            }
+            counter++;
+            result.append(counter).append(". ").append(game.gameName()).append("\n - ").append(game.whiteUsername()).append("\n - ").append(game.blackUsername()).append("\n");
+        }
         return result.toString();
     }
 
 
     public String joinGame(String... params) throws ResponseException {
         assertSignedIn();
+        GameData selectedGame;
         if (params.length >= 2) {
-        var gameID = Integer.parseInt(params[0]);
+            int gameNumber = Integer.parseInt(params[0]);
+            selectedGame = this.games.get(gameNumber - 1);
             var playerColor = params[1];
             JoinGameBody.Color color = null;
             if (playerColor.equals("white")){
@@ -99,11 +107,13 @@ public class ChessClient {
             } else if (playerColor.equals("black")){
                 color = JoinGameBody.Color.BLACK;
             }
-            server.joinGame(this.auth, gameID, color);
+            server.joinGame(this.auth, selectedGame.gameID(), color);
             state = State.PLAYING;
-            return String.format("You joined game %d.", gameID);
+            ChessBoardUI ui = new ChessBoardUI(selectedGame.game());
+            var prettyBoard = ui.prettyPrint();
+            return String.format("%s", prettyBoard);
         }
-        throw new ResponseException(400, "Expected: <game id> <color>");
+        throw new ResponseException(400, "Expected: <game number> <color>");
     }
 
     public String createGame(String... params) throws ResponseException {
@@ -112,7 +122,8 @@ public class ChessClient {
             var gameName = params[0];
             var game = new GameData(null, null, null, gameName, new ChessGame());
             var newGame = server.createGame(this.auth, game);
-            return String.format("You created game %d: %s", newGame.gameID(), newGame.gameName());
+//            this.games.add(newGame);
+            return String.format("You created game \"%s\"", newGame.gameName());
         }
         throw new ResponseException(400, "Expected: <game name>");
     }
@@ -120,10 +131,18 @@ public class ChessClient {
     public String observeGame(String... params) throws ResponseException {
         assertSignedIn();
         if (params.length >= 1) {
-            var gameID = Integer.parseInt(params[0]);
-            return String.format("You are observing game %d.", gameID);
+            var gameNumber = Integer.parseInt(params[0]);
+            GameData selectedGame = this.games.get(gameNumber - 1);
+            ChessBoardUI ui = new ChessBoardUI(selectedGame.game());
+            state = State.PLAYING;
+            return ui.prettyPrint();
         }
-        throw new ResponseException(400, "Expected: <game id>");
+        throw new ResponseException(400, "Expected: <game number>");
+    }
+
+    public String leaveGame() {
+        state = State.SIGNEDIN;
+        return "You have left the game.";
     }
 
     public String help() {
@@ -137,9 +156,9 @@ public class ChessClient {
         } else if (state == State.SIGNEDIN) {
             return """
                     - list
-                    - join <game id> <white|black|either>
+                    - join <game number> <white|black>
                     - create <game name>
-                    - observe <game id>
+                    - observe <game number>
                     - signout
                     - help
                     - quit
@@ -147,7 +166,8 @@ public class ChessClient {
 
         }
         return """
-                - game stuff
+                - game menu
+                - leave
                 - help
                 - quit
                 """;

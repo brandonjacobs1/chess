@@ -46,9 +46,9 @@ public class ServerFacade {
         return this.makeRequest("GET", path, null, t, auth);
     }
 
-    public void joinGame(AuthData auth, int gameID, JoinGameBody.Color color) throws ResponseException {
+    public GameData joinGame(AuthData auth, int gameID, JoinGameBody.Color color) throws ResponseException {
         var path = "/game";
-        this.makeRequest("PUT", path, new JoinGameBody(color, gameID), null, auth);
+        return this.makeRequest("PUT", path, new JoinGameBody(color, gameID), null, auth);
     }
 
     public GameData createGame(AuthData auth, GameData game) throws ResponseException {
