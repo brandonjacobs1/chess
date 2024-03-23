@@ -4,7 +4,6 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IGameDAO;
-import dataAccess.MemoryAccess.MemoryGameDAO;
 import dataAccess.SqlAccess.SQLGameDAO;
 import model.GameData;
 import model.JoinGameBody;

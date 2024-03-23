@@ -2,7 +2,6 @@ package dataAccess.SqlAccess;
 
 import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IAuthDAO;
-import dataAccess.MemoryAccess.MemoryUserDAO;
 import model.AuthData;
 import model.UserData;
 

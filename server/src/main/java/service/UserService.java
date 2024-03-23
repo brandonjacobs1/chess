@@ -3,8 +3,6 @@ package service;
 import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IAuthDAO;
 import dataAccess.Interfaces.IUserDAO;
-import dataAccess.MemoryAccess.MemoryAuthDAO;
-import dataAccess.MemoryAccess.MemoryUserDAO;
 import dataAccess.SqlAccess.SQLUserDAO;
 import dataAccess.SqlAccess.SQLAuthDAO;
 import model.AuthData;

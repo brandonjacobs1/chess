@@ -3,7 +3,6 @@ package server;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import chess.ChessBoard;
 import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
