@@ -21,7 +21,6 @@ public class ServerFacade {
         this.apiManager = new ApiCall(url);
     }
 
-
     public AuthData register(UserData user) throws ResponseException {
         var path = "/user";
         Type t = new TypeToken<AuthData>(){}.getType();
@@ -52,10 +51,5 @@ public class ServerFacade {
     public GameData createGame(AuthData auth, GameData game) throws ResponseException {
         var path = "/game";
         return apiManager.makeRequest("POST", path, game, new TypeToken<GameData>(){}.getType(), auth);
-    }
-
-    public void clear() throws ResponseException {
-        var path = "/db";
-        apiManager.makeRequest("DELETE", path, null, null, null);
     }
 }

@@ -6,6 +6,7 @@ import model.AuthData;
 import model.GameData;
 import model.JoinGameBody;
 import model.UserData;
+import server.ApiCall;
 import server.ResponseException;
 import server.Server;
 import server.ServerFacade;
@@ -21,12 +22,15 @@ public class ServerFacadeTests {
     private static ServerFacade serverFacade;
     private static int gameID;
 
+    private static String serverUrl;
+
     @BeforeAll
     public static void init() {
         server = new Server();
         int port = server.run(8080);
         System.out.println("Started test HTTP server on " + port);
-        serverFacade = new ServerFacade("http://localhost:" + port);
+        serverUrl = "http://localhost:" + port;
+        serverFacade = new ServerFacade(serverUrl);
     }
 
     @AfterAll
@@ -36,9 +40,9 @@ public class ServerFacadeTests {
 
     @BeforeAll
     static void clear() {
-        int i = 0;
         try {
-            serverFacade.clear();
+            ApiCall apiManager = new ApiCall(serverUrl);
+            apiManager.makeRequest("DELETE", "/db", null, null, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
