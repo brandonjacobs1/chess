@@ -10,8 +10,8 @@ public class ChessBoardUI {
     ChessGame game;
 
     private static final String ANSI_RESET = "\u001B[0m";
-    private static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
-    private static final String ANSI_YELLOW_BACKGROUND = "\u001B[43m";
+    private static final String ANSI_BROWN_BACKGROUND = "\u001B[48;5;222m";
+    private static final String ANSI_YELLOW_BACKGROUND = "\u001B[48;5;95m";
 
     public ChessBoardUI(ChessGame game) {
         this.game = game;
@@ -37,9 +37,9 @@ public class ChessBoardUI {
 
         for (int col = 0; col < board[0].length; col++) {
             // Print left column numbers
-            result.append(col + 1).append(" ");
+            result.append(ANSI_RESET).append(col + 1).append(" ");
             for (int row = 0; row < board.length; row++) {
-                String backgroundColor = (row + col) % 2 == 0 ? ANSI_WHITE_BACKGROUND : ANSI_YELLOW_BACKGROUND;
+                String backgroundColor = (row + col) % 2 == 0 ? ANSI_BROWN_BACKGROUND : ANSI_YELLOW_BACKGROUND;
                 ChessPiece piece = board[row][col];
                 if (piece == null) {
                     result.append(ANSI_RESET).append(backgroundColor).append("   ").append(ANSI_RESET); // Adjust spaces as needed
@@ -73,7 +73,7 @@ public class ChessBoardUI {
             // Print left column numbers
             result.append(col + 1).append(" ");
             for (int row = board.length - 1; row >= 0; row--) {
-                String backgroundColor = (row + col) % 2 == 0 ? ANSI_WHITE_BACKGROUND : ANSI_YELLOW_BACKGROUND;
+                String backgroundColor = (row + col) % 2 == 0 ? ANSI_BROWN_BACKGROUND : ANSI_YELLOW_BACKGROUND;
                 ChessPiece piece = board[row][col];
                 if (piece == null) {
                     result.append(ANSI_RESET).append(backgroundColor).append("   ").append(ANSI_RESET); // Adjust spaces as needed
