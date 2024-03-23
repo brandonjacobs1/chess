@@ -8,11 +8,5 @@ public class Main {
         }
 
         new Repl(serverUrl).run();
-//        ChessGame game = new ChessGame();
-//        game.setBoard(new ChessBoard());
-//        game.getBoard().resetBoard();
-//        ChessBoardUI ui = new ChessBoardUI(game);
-//        var x = ui.prettyPrint();
-//        System.out.println(x);
     }
 }
