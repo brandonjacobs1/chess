@@ -2,7 +2,7 @@ package clientTests;
 
 import chess.ChessGame;
 import org.junit.jupiter.api.*;
-        import model.AuthData;
+import model.AuthData;
 import model.GameData;
 import model.JoinGameBody;
 import model.UserData;
