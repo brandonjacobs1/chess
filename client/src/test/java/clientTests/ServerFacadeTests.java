@@ -142,5 +142,17 @@ public class ServerFacadeTests {
         JoinGameBody.Color color = null;
         assertThrows(ResponseException.class, () -> serverFacade.joinGame(authData, gameId, color));
     }
+    @Test
+    public void constructorTestPositive() {
+        ServerFacade serverFacade = new ServerFacade(serverUrl);
+        assertNotNull(serverFacade);
+    }
+
+    @Test
+    public void constructorTestNegative() {
+        assertDoesNotThrow(() -> {
+            new ServerFacade("http://localhost:8080");
+        });
+    }
 
 }
