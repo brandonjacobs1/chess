@@ -37,6 +37,10 @@ public class ChessClient {
                 case "create" -> createGame(params);
                 case "observe" -> observeGame(params);
                 case "leave" -> leaveGame();
+                case "show" -> showMoves();
+                case "move" -> makeMove(params);
+                case "redraw" -> redraw();
+                case "resign" -> resign();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -78,16 +82,39 @@ public class ChessClient {
         state = State.SIGNEDOUT;
         return String.format("You have signed out.");
     }
+    private void setGames() throws ResponseException {
+        try {
+            var gameMap = this.server.listGames(this.auth);
+            ArrayList<GameData> games = gameMap.get("games");
+            this.games = games;
+        } catch (Exception e){
+           throw new ResponseException(500, "Error getting games");
+        }
+    }
     public String listGames() throws ResponseException {
         assertSignedIn();
-        var gameMap = this.server.listGames(this.auth);
-        ArrayList<GameData> games = gameMap.get("games");
-        this.games = games;
+        setGames();
         var result = new StringBuilder();
         int counter = 0;
+        if (games.isEmpty()) {
+            return "No games available. To create a game tyoe \"create <game name>\"";
+        }
         for (GameData game : games) {
             counter++;
-            result.append(counter).append(". ").append(game.gameName()).append("\n - ").append(game.whiteUsername()).append("\n - ").append(game.blackUsername()).append("\n");
+            var whiteText = new StringBuilder();
+            var blackText = new StringBuilder();
+
+            if (game.whiteUsername() == null) {
+                whiteText.append("Type \"join ").append(counter).append(" white\" to join game");
+            } else {
+                whiteText.append(game.whiteUsername());
+            }
+            if (game.blackUsername() == null) {
+                blackText.append("Type \"join ").append(counter).append(" black\" to join game");
+            } else {
+                blackText.append(game.blackUsername());
+            }
+            result.append(counter).append(". ").append(game.gameName()).append("\n white: ").append(whiteText).append("\n black: ").append(blackText).append("\n");
         }
         return result.toString();
     }
@@ -101,17 +128,19 @@ public class ChessClient {
             selectedGame = this.games.get(gameNumber - 1);
             var playerColor = params[1];
             JoinGameBody.Color color = null;
-            if (playerColor.equals("white")){
+            if (playerColor.equals("white")) {
                 color = JoinGameBody.Color.WHITE;
-            } else if (playerColor.equals("black")){
+            } else if (playerColor.equals("black")) {
                 color = JoinGameBody.Color.BLACK;
             }
             server.joinGame(this.auth, selectedGame.gameID(), color);
+            setGames();
+            selectedGame = this.games.get(gameNumber - 1);
             state = State.PLAYING;
             ChessBoardUI ui = new ChessBoardUI(selectedGame.game());
             var prettyBoard = ui.prettyPrint();
             return String.format("%s", prettyBoard);
-        }
+            }
         throw new ResponseException(400, "Expected: <game number> <color>");
     }
 
@@ -121,7 +150,6 @@ public class ChessClient {
             var gameName = params[0];
             var game = new GameData(null, null, null, gameName, new ChessGame());
             var newGame = server.createGame(this.auth, game);
-//            this.games.add(newGame);
             return String.format("You created game \"%s\"", newGame.gameName());
         }
         throw new ResponseException(400, "Expected: <game name>");
@@ -142,6 +170,27 @@ public class ChessClient {
     public String leaveGame() {
         state = State.SIGNEDIN;
         return "You have left the game.";
+    }
+
+    public String showMoves() {
+        return "Moves: ";
+    }
+
+    public String makeMove(String... params) throws ResponseException {
+        if (params.length >= 2) {
+            var from = params[0];
+            var to = params[1];
+            return "Move made";
+        }
+        throw new ResponseException(400, "Expected: <from> <to>");
+    }
+
+    public String redraw() {
+        return "Redrawing board";
+    }
+
+    public String resign() {
+        return "You have resigned";
     }
 
     public String help() {
@@ -165,7 +214,12 @@ public class ChessClient {
 
         }
         return """
-                - game menu
+                - show
+                    - This command will show available moves.
+                - move <from> <to>
+                    - From and to represent a piece position. Should be column letter then row number.
+                - redraw
+                - resign
                 - leave
                 - help
                 - quit
