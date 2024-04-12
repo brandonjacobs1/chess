@@ -6,21 +6,25 @@ import java.util.Arrays;
 import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
-import model.JoinGameBody;
 import model.UserData;
 import ui.ChessBoardUI;
+import webSocket.ServerMessageHandler;
+import webSocket.WebSocketFacade;
 
 public class ChessClient {
-    private String visitorName = null;
     private final ServerFacade server;
     private final String serverUrl;
     private AuthData auth;
     private State state = State.SIGNEDOUT;
     private ArrayList<GameData> games = new ArrayList<>();
+    private ServerMessageHandler serverMessageHandler;
+    private WebSocketFacade ws;
 
-    public ChessClient(String serverUrl) {
+
+    public ChessClient(String serverUrl, ServerMessageHandler serverMessageHandler) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
+        this.serverMessageHandler = serverMessageHandler;
     }
 
     public String eval(String input) {
@@ -127,15 +131,17 @@ public class ChessClient {
             int gameNumber = Integer.parseInt(params[0]);
             selectedGame = this.games.get(gameNumber - 1);
             var playerColor = params[1];
-            JoinGameBody.Color color = null;
+            ChessGame.TeamColor color = null;
             if (playerColor.equals("white")) {
-                color = JoinGameBody.Color.WHITE;
+                color = ChessGame.TeamColor.WHITE;
             } else if (playerColor.equals("black")) {
-                color = JoinGameBody.Color.BLACK;
+                color = ChessGame.TeamColor.BLACK;
             }
             server.joinGame(this.auth, selectedGame.gameID(), color);
             setGames();
             selectedGame = this.games.get(gameNumber - 1);
+            ws = new WebSocketFacade(serverUrl, serverMessageHandler);
+            ws.joinGame(this.auth.authToken(),selectedGame.gameID(), color);
             state = State.PLAYING;
             ChessBoardUI ui = new ChessBoardUI(selectedGame.game());
             var prettyBoard = ui.prettyPrint();
@@ -160,6 +166,9 @@ public class ChessClient {
         if (params.length >= 1) {
             var gameNumber = Integer.parseInt(params[0]);
             GameData selectedGame = this.games.get(gameNumber - 1);
+            if (selectedGame.game() == null) {
+                throw new ResponseException(400, "Game has not been started. Please wait for a player to join.");
+            }
             ChessBoardUI ui = new ChessBoardUI(selectedGame.game());
             state = State.PLAYING;
             return ui.prettyPrint();
