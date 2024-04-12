@@ -4,7 +4,7 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 
-import static chess.ChessPiece.PieceType.*;
+import static ui.EscapeSequences.*;
 
 public class ChessBoardUI {
     ChessGame game;
@@ -30,23 +30,14 @@ public class ChessBoardUI {
         ChessPiece[][] board = fullBoard.getBoard();
         // Print top row letters
         result.append(ANSI_RESET).append("   "); // Add leading spaces for alignment
-        for (int row = 0; row < board.length; row++) {
-            result.append((char) ('a' + row)).append("  ");
-        }
+        hToA(result, board);
         result.append("\n");
 
         for (int col = 0; col < board[0].length; col++) {
             // Print left column numbers
             result.append(ANSI_RESET).append(col + 1).append(" ");
             for (int row = 0; row < board.length; row++) {
-                String backgroundColor = (row + col) % 2 == 0 ? ANSI_BROWN_BACKGROUND : ANSI_YELLOW_BACKGROUND;
-                ChessPiece piece = board[row][col];
-                if (piece == null) {
-                    result.append(ANSI_RESET).append(backgroundColor).append("   ").append(ANSI_RESET); // Adjust spaces as needed
-                } else {
-                    String symbol = getPieceSymbol(piece);
-                    result.append(ANSI_RESET).append(backgroundColor).append(symbol).append(ANSI_RESET);
-                }
+                addSquareAndPiece(result, board, col, row);
             }
             // Print right column numbers
             result.append(" ").append(col + 1).append("\n");
@@ -54,6 +45,21 @@ public class ChessBoardUI {
 
         // Print bottom row letters
         result.append("   "); // Add leading spaces for alignment
+        hToA(result, board);
+    }
+
+    private void addSquareAndPiece(StringBuilder result, ChessPiece[][] board, int col, int row) {
+        String backgroundColor = (row + col) % 2 == 0 ? ANSI_BROWN_BACKGROUND : ANSI_YELLOW_BACKGROUND;
+        ChessPiece piece = board[row][col];
+        if (piece == null) {
+            result.append(ANSI_RESET).append(backgroundColor).append("   ").append(ANSI_RESET);
+        } else {
+            String symbol = getPieceSymbol(piece);
+            result.append(ANSI_RESET).append(backgroundColor).append(SET_TEXT_BOLD).append(BLACK).append(symbol).append(ANSI_RESET);
+        }
+    }
+
+    private static void aToH(StringBuilder result, ChessPiece[][] board) {
         for (int row = 0; row < board.length; row++) {
             result.append((char) ('a' + row)).append("  ");
         }
@@ -64,23 +70,14 @@ public class ChessBoardUI {
 
         // Print bottom row letters
         result.append("   "); // Add leading spaces for alignment
-        for (int row = board.length - 1; row >= 0; row--) {
-            result.append((char) ('a' + row)).append("  ");
-        }
+        aToH(result, board);
         result.append("\n");
 
         for (int col = board[0].length - 1; col >= 0; col--) {
             // Print left column numbers
             result.append(col + 1).append(" ");
             for (int row = board.length - 1; row >= 0; row--) {
-                String backgroundColor = (row + col) % 2 == 0 ? ANSI_BROWN_BACKGROUND : ANSI_YELLOW_BACKGROUND;
-                ChessPiece piece = board[row][col];
-                if (piece == null) {
-                    result.append(ANSI_RESET).append(backgroundColor).append("   ").append(ANSI_RESET); // Adjust spaces as needed
-                } else {
-                    String symbol = getPieceSymbol(piece);
-                    result.append(ANSI_RESET).append(backgroundColor).append(symbol).append(ANSI_RESET);
-                }
+                addSquareAndPiece(result, board, col, row);
             }
             // Print right column numbers
             result.append(" ").append(col + 1).append("\n");
@@ -88,12 +85,14 @@ public class ChessBoardUI {
 
         // Print top row letters
         result.append("   "); // Add leading spaces for alignment
+        aToH(result, board);
+    }
+
+    private static void hToA(StringBuilder result, ChessPiece[][] board) {
         for (int row = board.length - 1; row >= 0; row--) {
             result.append((char) ('a' + row)).append("  ");
         }
     }
-
-
 
 
     private String getPieceSymbol(ChessPiece piece) {
