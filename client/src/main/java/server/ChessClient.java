@@ -141,11 +141,9 @@ public class ChessClient {
             setGames();
             selectedGame = this.games.get(gameNumber - 1);
             ws = new WebSocketFacade(serverUrl, serverMessageHandler);
-            ws.joinGame(this.auth.authToken(),selectedGame.gameID(), color);
+            ws.joinPlayer(this.auth.authToken(),selectedGame.gameID(), color);
             state = State.PLAYING;
-            ChessBoardUI ui = new ChessBoardUI(selectedGame.game());
-            var prettyBoard = ui.prettyPrint();
-            return String.format("%s", prettyBoard);
+            return String.format("You joined game \"%s\" as %s!", selectedGame.gameName(), playerColor);
             }
         throw new ResponseException(400, "Expected: <game number> <color>");
     }
@@ -169,9 +167,10 @@ public class ChessClient {
             if (selectedGame.game() == null) {
                 throw new ResponseException(400, "Game has not been started. Please wait for a player to join.");
             }
-            ChessBoardUI ui = new ChessBoardUI(selectedGame.game());
+            ws = new WebSocketFacade(serverUrl, serverMessageHandler);
+            ws.joinObserver(this.auth.authToken(),selectedGame.gameID());
             state = State.PLAYING;
-            return ui.prettyPrint();
+            return String.format("You joined game \"%s\" as an observer!", selectedGame.gameName());
         }
         throw new ResponseException(400, "Expected: <game number>");
     }

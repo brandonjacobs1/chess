@@ -39,4 +39,13 @@ public class ConnectionManager {
             connections.remove(c.authString);
         }
     }
+
+    public void reply(String authString, ServerMessage serverMessage) throws IOException {
+        var connection = connections.get(authString);
+        if (connection.session.isOpen()) {
+            connection.send(new Gson().toJson(serverMessage));
+        } else {
+            connections.remove(authString);
+        }
+    }
 }

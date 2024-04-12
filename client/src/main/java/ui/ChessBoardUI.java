@@ -26,8 +26,27 @@ public class ChessBoardUI {
         return result.toString();
     }
 
+    public String printWhite() {
+        StringBuilder result = new StringBuilder();
+        ChessBoard board = game.getBoard();
+        printBoard(board, result);
+        return result.toString();
+    }
+
+    public String printBlack() {
+        StringBuilder result = new StringBuilder();
+        ChessBoard board = game.getBoard();
+        printBoardReversed(board, result);
+        return result.toString();
+    }
+
+    public String printObserver() {
+        return printWhite();
+    }
+
     private void printBoard(ChessBoard fullBoard, StringBuilder result) {
         ChessPiece[][] board = fullBoard.getBoard();
+        result.append("\n");
         // Print top row letters
         result.append(ANSI_RESET).append("   "); // Add leading spaces for alignment
         hToA(result, board);
@@ -68,8 +87,9 @@ public class ChessBoardUI {
     private void printBoardReversed(ChessBoard fullBoard, StringBuilder result) {
         ChessPiece[][] board = fullBoard.getBoard();
 
+        result.append("\n");
         // Print bottom row letters
-        result.append("   "); // Add leading spaces for alignment
+        result.append(ANSI_RESET).append("   "); // Add leading spaces for alignment
         aToH(result, board);
         result.append("\n");
 

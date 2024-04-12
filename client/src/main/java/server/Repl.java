@@ -1,6 +1,7 @@
 package server;
 
 import webSocket.ServerMessageHandler;
+import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
 
 import java.util.Scanner;
@@ -35,9 +36,14 @@ public class Repl implements ServerMessageHandler {
         System.out.println();
     }
 
-    public void showMessage(ServerMessage notification) {
+    public void showLoadGameMessage(String board) {
+        System.out.println(board);
+        printPrompt();
+    }
+
+    public void showNotificationMessage(NotificationMessage notification) {
         StringBuilder sb = new StringBuilder();
-        sb.append(ERASE_LINE).append(RED).append(notification).append(RESET);
+        sb.append(ERASE_LINE).append(RED).append(notification.getMessage()).append(RESET);
         System.out.print(sb);
         printPrompt();
     }

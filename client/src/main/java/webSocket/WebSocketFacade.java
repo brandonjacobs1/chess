@@ -3,10 +3,12 @@ package webSocket;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import server.ResponseException;
-import webSocketMessages.serverMessages.Error;
-import webSocketMessages.serverMessages.LoadGame;
-import webSocketMessages.serverMessages.Notification;
+import ui.ChessBoardUI;
+import webSocketMessages.serverMessages.ErrorMessage;
+import webSocketMessages.serverMessages.LoadGameMessage;
+import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.JoinObserverCommand;
 import webSocketMessages.userCommands.JoinPlayerCommand;
 import webSocketMessages.userCommands.UserGameCommand;
 
@@ -38,7 +40,7 @@ public class WebSocketFacade extends Endpoint {
                     ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
 
                     switch (serverMessage.getServerMessageType()) {
-                        case LOAD_GAME -> loadGame(message, session);
+                        case LOAD_GAME -> loadGame(message);
                         case ERROR -> error(message, session);
                         case NOTIFICATION -> notification(message, session);
                     }
@@ -70,8 +72,28 @@ public class WebSocketFacade extends Endpoint {
             throw new IOException(ex.getMessage());
         }
     }
+    public void error(String message, Session session) {
+        ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
+    }
 
-    public void joinGame(String authToken, int gameId, ChessGame.TeamColor teamColor) throws ResponseException {
+    public void loadGame(String message) {
+        LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
+        ChessBoardUI ui = new ChessBoardUI(loadGameMessage.getGame());
+        if (loadGameMessage.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            serverMessageHandler.showLoadGameMessage(ui.printWhite());
+        } else if (loadGameMessage.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            serverMessageHandler.showLoadGameMessage(ui.printBlack());
+        } else {
+            serverMessageHandler.showLoadGameMessage(ui.printWhite());
+        }
+    }
+
+    public void notification(String message, Session session) {
+        NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
+        serverMessageHandler.showNotificationMessage(notificationMessage);
+    }
+
+    public void joinPlayer(String authToken, int gameId, ChessGame.TeamColor teamColor) throws ResponseException {
         try {
             var command = new JoinPlayerCommand(authToken, gameId, teamColor);
             send(command);
@@ -79,17 +101,12 @@ public class WebSocketFacade extends Endpoint {
             throw new ResponseException(500, ex.getMessage());
         }
     }
-    public void error(String message, Session session) {
-        Error errorMessage = new Gson().fromJson(message, Error.class);
+    public void joinObserver(String authToken, int gameId) throws ResponseException {
+        try {
+            var command = new JoinObserverCommand(authToken, gameId);
+            send(command);
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
     }
-
-    public void loadGame(String message, Session session) {
-        LoadGame loadGameMessage = new Gson().fromJson(message, LoadGame.class);
-    }
-
-    public void notification(String message, Session session) {
-        Notification errorMessage = new Gson().fromJson(message, Notification.class);
-        serverMessageHandler.showMessage(errorMessage);
-    }
-
 }

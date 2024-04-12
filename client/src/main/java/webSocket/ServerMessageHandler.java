@@ -1,7 +1,10 @@
 package webSocket;
 
+import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
 
 public interface ServerMessageHandler {
-    void showMessage(ServerMessage notification);
+    void showNotificationMessage(NotificationMessage notification);
+
+    void showLoadGameMessage(String s);
 }
