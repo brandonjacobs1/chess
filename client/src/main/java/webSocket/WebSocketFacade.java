@@ -16,6 +16,7 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 //need to extend Endpoint for websocket to work properly
 public class WebSocketFacade extends Endpoint {
@@ -79,12 +80,13 @@ public class WebSocketFacade extends Endpoint {
     public void loadGame(String message) {
         LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
         ChessBoardUI ui = new ChessBoardUI(loadGameMessage.getGame());
+        ui.setValidMoves(null);
         if (loadGameMessage.getTeamColor() == ChessGame.TeamColor.WHITE) {
             serverMessageHandler.showLoadGameMessage(ui.printWhite());
         } else if (loadGameMessage.getTeamColor() == ChessGame.TeamColor.BLACK) {
             serverMessageHandler.showLoadGameMessage(ui.printBlack());
         } else {
-            serverMessageHandler.showLoadGameMessage(ui.printWhite());
+            serverMessageHandler.showLoadGameMessage(ui.prettyPrint());
         }
     }
 

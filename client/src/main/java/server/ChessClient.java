@@ -2,14 +2,20 @@ package server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import ui.ChessBoardUI;
 import webSocket.ServerMessageHandler;
 import webSocket.WebSocketFacade;
+
+import static java.lang.Integer.parseInt;
 
 public class ChessClient {
     private final ServerFacade server;
@@ -19,6 +25,7 @@ public class ChessClient {
     private ArrayList<GameData> games = new ArrayList<>();
     private ServerMessageHandler serverMessageHandler;
     private WebSocketFacade ws;
+    private GameData game;
 
 
     public ChessClient(String serverUrl, ServerMessageHandler serverMessageHandler) {
@@ -41,7 +48,7 @@ public class ChessClient {
                 case "create" -> createGame(params);
                 case "observe" -> observeGame(params);
                 case "leave" -> leaveGame();
-                case "show" -> showMoves();
+                case "show" -> showMoves(params);
                 case "move" -> makeMove(params);
                 case "redraw" -> redraw();
                 case "resign" -> resign();
@@ -128,7 +135,7 @@ public class ChessClient {
         assertSignedIn();
         GameData selectedGame;
         if (params.length >= 2) {
-            int gameNumber = Integer.parseInt(params[0]);
+            int gameNumber = parseInt(params[0]);
             selectedGame = this.games.get(gameNumber - 1);
             var playerColor = params[1];
             ChessGame.TeamColor color = null;
@@ -143,6 +150,7 @@ public class ChessClient {
             ws = new WebSocketFacade(serverUrl, serverMessageHandler);
             ws.joinPlayer(this.auth.authToken(),selectedGame.gameID(), color);
             state = State.PLAYING;
+            game = selectedGame;
             return String.format("You joined game \"%s\" as %s!", selectedGame.gameName(), playerColor);
             }
         throw new ResponseException(400, "Expected: <game number> <color>");
@@ -162,7 +170,7 @@ public class ChessClient {
     public String observeGame(String... params) throws ResponseException {
         assertSignedIn();
         if (params.length >= 1) {
-            var gameNumber = Integer.parseInt(params[0]);
+            var gameNumber = parseInt(params[0]);
             GameData selectedGame = this.games.get(gameNumber - 1);
             if (selectedGame.game() == null) {
                 throw new ResponseException(400, "Game has not been started. Please wait for a player to join.");
@@ -170,6 +178,7 @@ public class ChessClient {
             ws = new WebSocketFacade(serverUrl, serverMessageHandler);
             ws.joinObserver(this.auth.authToken(),selectedGame.gameID());
             state = State.PLAYING;
+            game = selectedGame;
             return String.format("You joined game \"%s\" as an observer!", selectedGame.gameName());
         }
         throw new ResponseException(400, "Expected: <game number>");
@@ -177,11 +186,44 @@ public class ChessClient {
 
     public String leaveGame() {
         state = State.SIGNEDIN;
+        game = null;
         return "You have left the game.";
     }
 
-    public String showMoves() {
-        return "Moves: ";
+    public String showMoves(String... params) throws ResponseException {
+        if (params.length >= 1) {
+            var positionString = params[0];
+            ChessPosition position = parsePosition(positionString);
+            Collection<ChessMove> validMoves = game.game().validMoves(position);
+            String username = auth.username();
+            ChessBoardUI ui = new ChessBoardUI(game.game());
+            return ui.toString(username, game.blackUsername(), game.whiteUsername(), validMoves);
+        }
+        throw new ResponseException(400, "Expected: <position>");
+
+    }
+
+    private ChessPosition parsePosition(String position) throws ResponseException {
+        int col;
+        int row;
+        try {
+            char letter = position.charAt(0);
+            row = parseInt(String.valueOf(position.charAt(1)));
+            switch (letter) {
+                case 'a' -> col = 1;
+                case 'b' -> col = 2;
+                case 'c' -> col = 3;
+                case 'd' -> col = 4;
+                case 'e' -> col = 5;
+                case 'f' -> col = 6;
+                case 'g' -> col = 7;
+                case 'h' -> col = 8;
+                default -> throw new ResponseException(400, "Invalid position");
+            };
+        } catch (Exception e) {
+            throw new ResponseException(400, "Invalid position");
+        }
+        return new ChessPosition(row, col);
     }
 
     public String makeMove(String... params) throws ResponseException {
@@ -194,7 +236,9 @@ public class ChessClient {
     }
 
     public String redraw() {
-        return "Redrawing board";
+        String username = auth.username();
+        ChessBoardUI ui = new ChessBoardUI(game.game());
+        return ui.toString(username, game.blackUsername(), game.whiteUsername(), null);
     }
 
     public String resign() {
@@ -222,10 +266,10 @@ public class ChessClient {
 
         }
         return """
-                - show
-                    - This command will show available moves.
+                - show <position>
+                    - This command will show available moves.Position should be row number then column letter.
                 - move <from> <to>
-                    - From and to represent a piece position. Should be column letter then row number.
+                    - From and to represent a piece position. Should be row number then column letter.
                 - redraw
                 - resign
                 - leave
