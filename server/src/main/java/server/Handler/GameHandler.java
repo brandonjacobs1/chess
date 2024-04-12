@@ -55,7 +55,7 @@ public class GameHandler extends APIHandler{
             validateBody(body, keysToValidate);
             // send to service
             UserData user = userService.getUser(req.headers("authorization"));
-            gameService.joinGame(user, body.gameID(), body.playerColor());
+            gameService.joinGame(user, body.gameID(), body.color());
             // return a response
             return "{}";
         } catch (DataAccessException | BadRequestException | DuplicateEntryException e) {

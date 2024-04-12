@@ -33,7 +33,7 @@ public class GameService {
         game = gameDAO.createGame(game);
         return game;
     }
-    public void joinGame(UserData user, int gameID, JoinGameBody.Color color) throws DuplicateEntryException, BadRequestException, DataAccessException {
+    public void joinGame(UserData user, int gameID, ChessGame.TeamColor color) throws DuplicateEntryException, BadRequestException, DataAccessException {
         GameData game = gameDAO.getGame(gameID);
         ChessGame chessGame = game.game();
         if (chessGame == null || chessGame.getBoard() == null) {
@@ -41,9 +41,9 @@ public class GameService {
             chessGame.setBoard(new ChessBoard());
             chessGame.getBoard().resetBoard();
         }
-        if (color == JoinGameBody.Color.WHITE && game.whiteUsername() == null) {
+        if (color == ChessGame.TeamColor.WHITE && game.whiteUsername() == null) {
             game = new GameData(gameID, user.username(), game.blackUsername(), game.gameName(), chessGame);
-        } else if (color == JoinGameBody.Color.BLACK && game.blackUsername() == null) {
+        } else if (color == ChessGame.TeamColor.BLACK && game.blackUsername() == null) {
             game = new GameData(gameID, game.whiteUsername(), user.username(), game.gameName(), chessGame);
         } else if (color == null && game.whiteUsername() == null && game.blackUsername() == null && game.whiteUsername() == null){
             game = new GameData(gameID, null, null, game.gameName(), chessGame);

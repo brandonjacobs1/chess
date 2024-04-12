@@ -3,6 +3,8 @@ package server;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Map;
+
+import chess.ChessGame;
 import com.google.gson.reflect.TypeToken;
 import model.AuthData;
 import model.GameData;
@@ -38,7 +40,7 @@ public class ServerFacade {
         return apiManager.makeRequest("GET", path, null, t, auth);
     }
 
-    public GameData joinGame(AuthData auth, int gameID, JoinGameBody.Color color) throws ResponseException {
+    public GameData joinGame(AuthData auth, int gameID, ChessGame.TeamColor color) throws ResponseException {
         var path = "/game";
         return apiManager.makeRequest("PUT", path, new JoinGameBody(color, gameID), null, auth);
     }

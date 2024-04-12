@@ -62,6 +62,7 @@ public class UserService {
             userDAO.clear();
             authDAO.clear();
         } catch (DataAccessException e) {
-            throw new RuntimeException(e.getMessage());        }
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

@@ -130,7 +130,7 @@ public class ServerFacadeTests {
         UserData userData = new UserData("username", "password", "email");
         AuthData authData = serverFacade.login(userData);
 
-        JoinGameBody.Color color = JoinGameBody.Color.BLACK;
+        ChessGame.TeamColor color = ChessGame.TeamColor.BLACK;
         assertDoesNotThrow(() -> serverFacade.joinGame(authData, this.gameID, color));
     }
 
@@ -138,7 +138,7 @@ public class ServerFacadeTests {
     public void testJoinGameNegative() {
         AuthData authData = null;
         int gameId = -1;
-        JoinGameBody.Color color = null;
+        ChessGame.TeamColor color = null;
         assertThrows(ResponseException.class, () -> serverFacade.joinGame(authData, gameId, color));
     }
     @Test

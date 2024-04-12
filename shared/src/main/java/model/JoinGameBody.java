@@ -1,8 +1,7 @@
 package model;
 
-public record JoinGameBody(Color playerColor, int gameID) {
-    public enum Color {
-         WHITE,
-        BLACK
-    }
+import chess.ChessGame.TeamColor;
+
+public record JoinGameBody(TeamColor color, int gameID) {
+
 }

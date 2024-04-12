@@ -1,33 +1,31 @@
 package server.Handler;
 
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
 import server.BadRequestException;
-import server.NotAuthenticatedException;
 import service.GameService;
 import service.UserService;
-import spark.Request;
-import spark.Response;
+import webSocket.WebSocketHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class APIHandler {
     public Gson serializer;
     public UserService userService;
     public GameService gameService;
-    public UserHandler userHandler;
-    public ClearHandler clearHandler;
-    public GameHandler gameHandler;
-    public APIHandler () {
+    public WebSocketHandler webSocketHandler;
+    public APIHandler (){
         serializer = new Gson();
 
         // Define services
         userService = new UserService();
         gameService = new GameService();
+    }
+
+    public void setWebSocketHandler(WebSocketHandler webSocketHandler) {
+        this.webSocketHandler = webSocketHandler;
     }
 
     public void validateBody(Record data, List<String> dataKeys) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, BadRequestException {

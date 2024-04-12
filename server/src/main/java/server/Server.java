@@ -4,6 +4,8 @@ import dataAccess.DataAccessException;
 import dataAccess.DatabaseManager;
 import server.Handler.*;
 import spark.*;
+import webSocket.WebSocketHandler;
+
 import java.util.*;
 
 public class Server {
@@ -11,10 +13,19 @@ public class Server {
     ClearHandler clearHandler;
     GameHandler gameHandler;
     ErrorHandler errorHandler;
+    WebSocketHandler webSocketHandler;
     public Server() {
+        webSocketHandler = new WebSocketHandler();
+
         userHandler = new UserHandler();
+        userHandler.setWebSocketHandler(webSocketHandler);
+
         clearHandler = new ClearHandler();
+        clearHandler.setWebSocketHandler(webSocketHandler);
+
         gameHandler = new GameHandler();
+        gameHandler.setWebSocketHandler(webSocketHandler);
+
         errorHandler = new ErrorHandler();
     }
 
@@ -30,9 +41,11 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
+        Spark.webSocket("/connect", WebSocketHandler.class);
+
         // Authenticate all routes that require authentication
         Spark.before((req, res) -> {
-            if (!req.pathInfo().equals("/user") && !req.pathInfo().equals("/db") && !(req.pathInfo().equals("/session") && Objects.equals(req.requestMethod(), "POST"))) {
+            if (!req.pathInfo().equals("/connect") && !req.pathInfo().equals("/user") && !req.pathInfo().equals("/db") && !(req.pathInfo().equals("/session") && Objects.equals(req.requestMethod(), "POST"))) {
                 boolean isAuthenticated = userHandler.authenticate(req.headers("authorization"));
                 if(!isAuthenticated) {
                     throw new NotAuthenticatedException("unauthorized");
