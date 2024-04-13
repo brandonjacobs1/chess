@@ -71,26 +71,26 @@ public class WebSocketHandler {
     public void joinPlayer(String message, Session session) throws IOException {
         JoinPlayerCommand joinPlayerCommand = new Gson().fromJson(message, JoinPlayerCommand.class);
         UserData user = authenticate(joinPlayerCommand.getAuthString());
-        connections.add(joinPlayerCommand.getAuthString(), joinPlayerCommand.getGameId(), session);
-        var notification = new NotificationMessage(user.username() + " joined the game as the " + joinPlayerCommand.getTeamColor() + " player");
-        connections.broadcastNonRootClient(joinPlayerCommand.getAuthString(), joinPlayerCommand.getGameId(), notification);
-        LoadGameMessage loadGameMessage = loadGame(joinPlayerCommand.getGameId(), user.username());
+        connections.add(joinPlayerCommand.getAuthString(), joinPlayerCommand.getGameID(), session);
+        var notification = new NotificationMessage(user.username() + " joined the game as the " + joinPlayerCommand.getPlayerColor() + " player");
+        connections.broadcastNonRootClient(joinPlayerCommand.getAuthString(), joinPlayerCommand.getGameID(), notification);
+        LoadGameMessage loadGameMessage = loadGame(joinPlayerCommand.getGameID(), user.username());
         connections.reply(joinPlayerCommand.getAuthString(), loadGameMessage);
     }
     private void joinObserver(String message, Session session) throws IOException {
         JoinObserverCommand joinObserverCommand = new Gson().fromJson(message, JoinObserverCommand.class);
         UserData user = authenticate(joinObserverCommand.getAuthString());
-        connections.add(joinObserverCommand.getAuthString(), joinObserverCommand.getGameId(), session);
+        connections.add(joinObserverCommand.getAuthString(), joinObserverCommand.getGameID(), session);
         var notification = new NotificationMessage(user.username() + " joined the game as an observer");
-        connections.broadcastNonRootClient(joinObserverCommand.getAuthString(), joinObserverCommand.getGameId(), notification);
-        LoadGameMessage loadGameMessage = loadGame(joinObserverCommand.getGameId(), user.username());
+        connections.broadcastNonRootClient(joinObserverCommand.getAuthString(), joinObserverCommand.getGameID(), notification);
+        LoadGameMessage loadGameMessage = loadGame(joinObserverCommand.getGameID(), user.username());
         connections.reply(joinObserverCommand.getAuthString(), loadGameMessage);
     }
     private void move(String message, Session session) throws IOException {
         try {
             MakeMoveCommand makeMoveCommand = new Gson().fromJson(message, MakeMoveCommand.class);
             UserData user = authenticate(makeMoveCommand.getAuthString());
-            int gameId = makeMoveCommand.getGameId();
+            int gameId = makeMoveCommand.getGameID();
             GameData gameData;
             try {
                 gameData = gameDAO.getGame(gameId);
@@ -122,16 +122,16 @@ public class WebSocketHandler {
             boolean isCheckmate = chessGame.isInCheckmate(chessGame.getTeamTurn());
 
             LoadGameMessage loadGameMessage = loadGame(gameId, user.username());
-            connections.broadcastAll(makeMoveCommand.getGameId(), loadGameMessage);
+            connections.broadcastAll(makeMoveCommand.getGameID(), loadGameMessage);
             NotificationMessage notification = new NotificationMessage(user.username() + " moved " + makeMoveCommand.getMove().toString());
-            connections.broadcastNonRootClient(makeMoveCommand.getAuthString(), makeMoveCommand.getGameId(), notification);
+            connections.broadcastNonRootClient(makeMoveCommand.getAuthString(), makeMoveCommand.getGameID(), notification);
 
             if (isCheckmate) {
                 gameService.completeGame(gameData);
-                connections.broadcastAll(makeMoveCommand.getGameId(), new NotificationMessage("Checkmate! " + user.username() + " has won the game."));
-                connections.closeAllConnections(makeMoveCommand.getGameId());
+                connections.broadcastAll(makeMoveCommand.getGameID(), new NotificationMessage("Checkmate! " + user.username() + " has won the game."));
+                connections.closeAllConnections(makeMoveCommand.getGameID());
             } else if (isInCheck) {
-                connections.broadcastAll(makeMoveCommand.getGameId(), new NotificationMessage("Check! " + user.username() + " is in check."));
+                connections.broadcastAll(makeMoveCommand.getGameID(), new NotificationMessage("Check! " + user.username() + " is in check."));
             }
         } catch (Exception e) {
             connections.reply(new Gson().fromJson(message, UserGameCommand.class).getAuthString(), new ErrorMessage(e.getMessage()));
@@ -153,7 +153,7 @@ public class WebSocketHandler {
     private void leave(String message, Session session) throws IOException {
         LeaveCommand leaveCommand = new Gson().fromJson(message, LeaveCommand.class);
         UserData user = authenticate(leaveCommand.getAuthString());
-        int gameId = leaveCommand.getGameId();
+        int gameId = leaveCommand.getGameID();
         GameData gameData;
         try {
             gameData = gameDAO.getGame(gameId);
@@ -163,7 +163,7 @@ public class WebSocketHandler {
         gameService.removePlayer(gameData, user.username());
         gameService.completeGame(gameData);
         NotificationMessage notification = new NotificationMessage(user.username() + " has left the game");
-        connections.broadcastNonRootClient(leaveCommand.getAuthString(), leaveCommand.getGameId(), notification);
+        connections.broadcastNonRootClient(leaveCommand.getAuthString(), leaveCommand.getGameID(), notification);
         session.close();
     }
     private void resign(String message, Session session) throws IOException {
@@ -171,13 +171,13 @@ public class WebSocketHandler {
         UserData user = authenticate(resignCommand.getAuthString());
         GameData gameData;
         try {
-            gameData = gameDAO.getGame(resignCommand.getGameId());
+            gameData = gameDAO.getGame(resignCommand.getGameID());
         } catch (DataAccessException | BadRequestException e) {
             throw new RuntimeException("Error loading game");
         }
         gameService.completeGame(gameData);
-        connections.broadcastAll(resignCommand.getGameId(), new NotificationMessage(user.username() + " has resigned the game."));
-        connections.closeAllConnections(resignCommand.getGameId());
+        connections.broadcastAll(resignCommand.getGameID(), new NotificationMessage(user.username() + " has resigned the game."));
+        connections.closeAllConnections(resignCommand.getGameID());
     }
 
     private LoadGameMessage loadGame(int gameId, String username) {

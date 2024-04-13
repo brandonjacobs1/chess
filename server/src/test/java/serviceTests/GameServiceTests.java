@@ -1,5 +1,6 @@
 package serviceTests;
 
+import chess.ChessGame;
 import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IGameDAO;
 import dataAccess.MemoryAccess.MemoryGameDAO;
@@ -74,7 +75,7 @@ public class GameServiceTests {
     public void testJoinGamePositive() throws DuplicateEntryException, BadRequestException, DataAccessException {
         GameData gameData = new GameData(null, null, null, "Test Game", null);
         gameData = gameDAO.createGame(gameData);
-        gameService.joinGame(new UserData("testUser", "testPassword", "testEmail"), gameData.gameID(), JoinGameBody.Color.WHITE);
+        gameService.joinGame(new UserData("testUser", "testPassword", "testEmail"), gameData.gameID(), ChessGame.TeamColor.WHITE);
 
         assertEquals("testUser", gameDAO.getGame(gameData.gameID()).whiteUsername());
     }
@@ -85,7 +86,7 @@ public class GameServiceTests {
         GameData gameData = new GameData(1, "WhitePlayer", null, "Test Game", null);
         gameDAO.createGame(gameData);
 
-        assertThrows(DuplicateEntryException.class, () -> gameService.joinGame(new UserData("testUser", "testPassword", "testEmail"), 1, JoinGameBody.Color.WHITE));
+        assertThrows(DuplicateEntryException.class, () -> gameService.joinGame(new UserData("testUser", "testPassword", "testEmail"), 1, ChessGame.TeamColor.WHITE));
     }
 
     @Test
