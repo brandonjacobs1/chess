@@ -56,6 +56,7 @@ public class WebSocketFacade extends Endpoint {
     }
 
     //Endpoint requires this method, but you don't have to do anything
+    @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
@@ -130,7 +131,7 @@ public class WebSocketFacade extends Endpoint {
             var command = new ResignCommand(authToken, gameId);
             send(command);
         } catch (IOException ex) {
-            throw new ResponseException(500, ex.getMessage());
+            throw new ResponseException(400, ex.getMessage());
         }
     }
 

@@ -66,9 +66,9 @@ public class SQLAuthDAO implements IAuthDAO {
     }
 
     public void clear() throws DataAccessException {
-        String DELETE_ALL_QUERY = "DELETE FROM auth";
+        String deleteAllQuery = "DELETE FROM auth";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement statement = conn.prepareStatement(DELETE_ALL_QUERY)) {
+             PreparedStatement statement = conn.prepareStatement(deleteAllQuery)) {
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());

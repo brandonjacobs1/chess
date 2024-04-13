@@ -23,7 +23,4 @@ public class MakeMoveCommand extends UserGameCommand {
         return move;
     }
 
-    public String message() {
-        return move.toString();
-    }
 }
