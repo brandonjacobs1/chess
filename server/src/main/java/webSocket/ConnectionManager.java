@@ -74,22 +74,6 @@ public class ConnectionManager {
         }
     }
 
-    public void closeAllConnections(int gameId) {
-        var removeList = new ArrayList<Connection>();
-        for (var c : connections.values()) {
-            if (c.gameId == gameId) {
-                if (c.session.isOpen()) {
-                    c.session.close();
-                }
-                removeList.add(c);
-            }
-        }
-
-        for (var c : removeList) {
-            connections.remove(c.authString);
-        }
-    }
-
     public boolean checkConnectionAvailable(int gameId, ChessGame.TeamColor teamColor, String authString) {
         for (var c : connections.values()) {
             if (c.gameId == gameId) {
@@ -101,7 +85,6 @@ public class ConnectionManager {
             }
         }
         return true;
-
     }
 
     public ChessGame.TeamColor getTeamColor(String authString) {

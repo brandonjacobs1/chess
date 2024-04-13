@@ -3,6 +3,7 @@ package server;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 
 import chess.ChessGame;
 import chess.ChessMove;
@@ -21,7 +22,7 @@ public class ChessClient {
     private final String serverUrl;
     private AuthData auth;
     private State state = State.SIGNEDOUT;
-    private ArrayList<GameData> games = new ArrayList<>();
+    private HashMap<Integer, GameData> games = new HashMap<>();
     private ServerMessageHandler serverMessageHandler;
     private WebSocketFacade ws;
     private GameData game;
@@ -97,7 +98,9 @@ public class ChessClient {
         try {
             var gameMap = this.server.listGames(this.auth);
             ArrayList<GameData> games = gameMap.get("games");
-            this.games = games;
+            for (int i=0; i<games.size(); i++) {
+                this.games.put(i, games.get(i));
+            }
         } catch (Exception e){
            throw new ResponseException(500, "Error getting games");
         }
@@ -107,27 +110,32 @@ public class ChessClient {
         assertNotInGame();
         setGames();
         var result = new StringBuilder();
-        int counter = 0;
         if (games.isEmpty()) {
-            return "No games available. To create a game tyoe \"create <game name>\"";
+            return "No games available. To create a game type \"create <game name>\"";
         }
-        for (GameData game : games) {
-            if (!game.game().isComplete()) {
-                counter++;
+        for (HashMap.Entry<Integer, GameData> gameData : games.entrySet()) {
+            int key = gameData.getKey();
+            GameData game = gameData.getValue();
+//            if (game.game() == null) {
+//                ChessGame newGame = new ChessGame();
+//                System.out.println(game.gameID());
+//                game = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), newGame);
+//            }
+            if (game.game() == null || !game.game().isComplete()) {
                 var whiteText = new StringBuilder();
                 var blackText = new StringBuilder();
 
                 if (game.whiteUsername() == null) {
-                    whiteText.append("Type \"join ").append(counter).append(" white\" to join game");
+                    whiteText.append("Type \"join ").append(key).append(" white\" to join game");
                 } else {
                     whiteText.append(game.whiteUsername());
                 }
                 if (game.blackUsername() == null) {
-                    blackText.append("Type \"join ").append(counter).append(" black\" to join game");
+                    blackText.append("Type \"join ").append(key).append(" black\" to join game");
                 } else {
                     blackText.append(game.blackUsername());
                 }
-                result.append(counter).append(". ").append(game.gameName()).append("\n white: ").append(whiteText).append("\n black: ").append(blackText).append("\n");
+                result.append(key).append(". ").append(game.gameName()).append("\n white: ").append(whiteText).append("\n black: ").append(blackText).append("\n");
             }
         }
         return result.toString();
@@ -139,8 +147,8 @@ public class ChessClient {
         assertNotInGame();
         GameData selectedGame;
         if (params.length >= 2) {
-            int gameNumber = parseInt(params[0]);
-            selectedGame = this.games.get(gameNumber - 1);
+            int key = parseInt(params[0]);
+            selectedGame = this.games.get(key);
             var playerColor = params[1];
             ChessGame.TeamColor color = null;
             if (playerColor.equals("white")) {
@@ -150,7 +158,7 @@ public class ChessClient {
             }
             server.joinGame(this.auth, selectedGame.gameID(), color);
             setGames();
-            selectedGame = this.games.get(gameNumber - 1);
+            selectedGame = this.games.get(key);
             ws = new WebSocketFacade(serverUrl, serverMessageHandler);
             ws.joinPlayer(this.auth.authToken(), this.auth.username(), selectedGame.gameID(), color);
             state = State.PLAYING;
@@ -328,9 +336,11 @@ public class ChessClient {
 
     public void updateGameList(GameData newGame) {
         int gameId = newGame.gameID();
-        for (int i = 0; i < games.size(); i++) {
-            if (games.get(i).gameID().equals(gameId)) {
-                games.set(i, newGame);
+        for (HashMap.Entry<Integer, GameData> gameData : games.entrySet()) {
+            int key = gameData.getKey();
+            GameData game = gameData.getValue();
+            if (game.gameID().equals(gameId)) {
+                games.put(key, newGame);
                 break;
             }
         }

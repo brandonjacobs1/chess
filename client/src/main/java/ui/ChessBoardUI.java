@@ -82,7 +82,7 @@ public class ChessBoardUI {
     }
 
     private void addSquareAndPiece(StringBuilder result, ChessBoard board, ChessPosition position) {
-        String backgroundColor = (position.getRow() + position.getColumn()) % 2 == 0 ? ANSI_BROWN_BACKGROUND : ANSI_YELLOW_BACKGROUND;
+        String backgroundColor = (position.getRow() + position.getColumn()) % 2 == 0 ?  ANSI_YELLOW_BACKGROUND : ANSI_BROWN_BACKGROUND;
         String highlightColor = SET_BG_COLOR_BLUE;
         boolean showValidMove = false;
         boolean showBlinking = false;

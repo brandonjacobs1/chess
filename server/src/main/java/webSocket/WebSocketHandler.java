@@ -157,7 +157,7 @@ public class WebSocketHandler {
             if (isCheckmate) {
                 gameService.completeGame(gameData);
                 connections.broadcastAll(makeMoveCommand.getGameID(), new NotificationMessage("Checkmate! " + user.username() + " has won the game."));
-                connections.closeAllConnections(makeMoveCommand.getGameID());
+//                connections.closeAllConnections(makeMoveCommand.getGameID());
             } else if (isInCheck) {
                 connections.broadcastAll(makeMoveCommand.getGameID(), new NotificationMessage("Check! " + user.username() + " is in check."));
             }
@@ -217,7 +217,7 @@ public class WebSocketHandler {
             }
             gameService.completeGame(gameData);
             connections.broadcastAll(resignCommand.getGameID(), new NotificationMessage(user.username() + " has resigned the game."));
-            connections.closeAllConnections(resignCommand.getGameID());
+//            connections.closeAllConnections(resignCommand.getGameID());
         } catch (WebSocketException e) {
             connections.reply(resignCommand.getAuthString(), new ErrorMessage("ERROR: " + e.getMessage()));
         }
