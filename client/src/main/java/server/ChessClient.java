@@ -116,11 +116,6 @@ public class ChessClient {
         for (HashMap.Entry<Integer, GameData> gameData : games.entrySet()) {
             int key = gameData.getKey();
             GameData game = gameData.getValue();
-//            if (game.game() == null) {
-//                ChessGame newGame = new ChessGame();
-//                System.out.println(game.gameID());
-//                game = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), newGame);
-//            }
             if (game.game() == null || !game.game().isComplete()) {
                 var whiteText = new StringBuilder();
                 var blackText = new StringBuilder();
