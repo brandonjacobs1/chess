@@ -1,5 +1,6 @@
 package webSocket;
 
+import chess.ChessGame;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.IOException;
@@ -9,10 +10,13 @@ public class Connection {
     public Session session;
     public int gameId;
 
-    public Connection(String authString, int gameId, Session session) {
+    public ChessGame.TeamColor teamColor;
+
+    public Connection(String authString, int gameId, ChessGame.TeamColor teamColor, Session session) {
         this.authString = authString;
         this.session = session;
         this.gameId = gameId;
+        this.teamColor = teamColor;
     }
 
     public void send(String msg) throws IOException {

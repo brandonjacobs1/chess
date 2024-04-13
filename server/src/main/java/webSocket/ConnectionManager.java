@@ -1,5 +1,6 @@
 package webSocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import webSocketMessages.serverMessages.ServerMessage;
@@ -11,8 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
-    public void add(String authString, int gameId, Session session) {
-        var connection = new Connection(authString, gameId, session);
+    public void add(String authString, int gameId, ChessGame.TeamColor teamColor, Session session) {
+        var connection = new Connection(authString, gameId, teamColor, session);
         connections.put(authString, connection);
     }
 
@@ -67,6 +68,12 @@ public class ConnectionManager {
         }
     }
 
+    public void sessionReply(Connection connection, ServerMessage serverMessage) throws IOException {
+        if (connection.session.isOpen()) {
+            connection.send(new Gson().toJson(serverMessage));
+        }
+    }
+
     public void closeAllConnections(int gameId) {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
@@ -81,5 +88,23 @@ public class ConnectionManager {
         for (var c : removeList) {
             connections.remove(c.authString);
         }
+    }
+
+    public boolean checkConnectionAvailable(int gameId, ChessGame.TeamColor teamColor, String authString) {
+        for (var c : connections.values()) {
+            if (c.gameId == gameId) {
+                if (c.authString.equals(authString)) {
+                    return false;
+                } else if (c.teamColor == teamColor) {
+                    return false;
+                }
+            }
+        }
+        return true;
+
+    }
+
+    public ChessGame.TeamColor getTeamColor(String authString) {
+        return connections.get(authString).teamColor;
     }
 }
