@@ -20,7 +20,7 @@ public class ConnectionManager {
         connections.remove(authString);
     }
 
-    public void broadcast(String rootClientAuthString, int gameId, ServerMessage serverMessage) throws IOException {
+    public void broadcastNonRootClient(String rootClientAuthString, int gameId, ServerMessage serverMessage) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
@@ -40,12 +40,46 @@ public class ConnectionManager {
         }
     }
 
+    public void broadcastAll(String rootClientAuthString, int gameId, ServerMessage serverMessage) throws IOException {
+        var removeList = new ArrayList<Connection>();
+        for (var c : connections.values()) {
+            if (c.session.isOpen()) {
+                if (gameId == c.gameId) {
+                    c.send(new Gson().toJson(serverMessage));
+                }
+            } else {
+                removeList.add(c);
+            }
+        }
+
+        // Clean up any connections that were left open.
+        for (var c : removeList) {
+            connections.remove(c.authString);
+        }
+    }
+
     public void reply(String authString, ServerMessage serverMessage) throws IOException {
         var connection = connections.get(authString);
         if (connection.session.isOpen()) {
             connection.send(new Gson().toJson(serverMessage));
         } else {
             connections.remove(authString);
+        }
+    }
+
+    public void closeAllConnections(int gameId) {
+        var removeList = new ArrayList<Connection>();
+        for (var c : connections.values()) {
+            if (c.gameId == gameId) {
+                if (c.session.isOpen()) {
+                    c.session.close();
+                }
+                removeList.add(c);
+            }
+        }
+
+        for (var c : removeList) {
+            connections.remove(c.authString);
         }
     }
 }

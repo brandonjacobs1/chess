@@ -3,7 +3,6 @@ package server;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
 
 import chess.ChessGame;
 import chess.ChessMove;
@@ -88,6 +87,7 @@ public class ChessClient {
 
     public String signOut() throws ResponseException {
         assertSignedIn();
+        assertNotInGame();
         server.logout(this.auth);
         this.auth = null;
         state = State.SIGNEDOUT;
@@ -104,6 +104,7 @@ public class ChessClient {
     }
     public String listGames() throws ResponseException {
         assertSignedIn();
+        assertNotInGame();
         setGames();
         var result = new StringBuilder();
         int counter = 0;
@@ -111,21 +112,23 @@ public class ChessClient {
             return "No games available. To create a game tyoe \"create <game name>\"";
         }
         for (GameData game : games) {
-            counter++;
-            var whiteText = new StringBuilder();
-            var blackText = new StringBuilder();
+            if (!game.game().isComplete()) {
+                counter++;
+                var whiteText = new StringBuilder();
+                var blackText = new StringBuilder();
 
-            if (game.whiteUsername() == null) {
-                whiteText.append("Type \"join ").append(counter).append(" white\" to join game");
-            } else {
-                whiteText.append(game.whiteUsername());
+                if (game.whiteUsername() == null) {
+                    whiteText.append("Type \"join ").append(counter).append(" white\" to join game");
+                } else {
+                    whiteText.append(game.whiteUsername());
+                }
+                if (game.blackUsername() == null) {
+                    blackText.append("Type \"join ").append(counter).append(" black\" to join game");
+                } else {
+                    blackText.append(game.blackUsername());
+                }
+                result.append(counter).append(". ").append(game.gameName()).append("\n white: ").append(whiteText).append("\n black: ").append(blackText).append("\n");
             }
-            if (game.blackUsername() == null) {
-                blackText.append("Type \"join ").append(counter).append(" black\" to join game");
-            } else {
-                blackText.append(game.blackUsername());
-            }
-            result.append(counter).append(". ").append(game.gameName()).append("\n white: ").append(whiteText).append("\n black: ").append(blackText).append("\n");
         }
         return result.toString();
     }
@@ -133,6 +136,7 @@ public class ChessClient {
 
     public String joinGame(String... params) throws ResponseException {
         assertSignedIn();
+        assertNotInGame();
         GameData selectedGame;
         if (params.length >= 2) {
             int gameNumber = parseInt(params[0]);
@@ -158,6 +162,7 @@ public class ChessClient {
 
     public String createGame(String... params) throws ResponseException {
         assertSignedIn();
+        assertNotInGame();
         if (params.length >= 1) {
             var gameName = params[0];
             var game = new GameData(null, null, null, gameName, new ChessGame());
@@ -169,6 +174,7 @@ public class ChessClient {
 
     public String observeGame(String... params) throws ResponseException {
         assertSignedIn();
+        assertNotInGame();
         if (params.length >= 1) {
             var gameNumber = parseInt(params[0]);
             GameData selectedGame = this.games.get(gameNumber - 1);
@@ -184,13 +190,18 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: <game number>");
     }
 
-    public String leaveGame() {
+    public String leaveGame() throws ResponseException {
+        assertInGame();
+        assertSignedIn();
         state = State.SIGNEDIN;
+        ws.leaveGame(auth.authToken(), game.gameID());
         game = null;
         return "You have left the game.";
     }
 
     public String showMoves(String... params) throws ResponseException {
+        assertInGame();
+        assertSignedIn();
         if (params.length >= 1) {
             var positionString = params[0];
             ChessPosition position = parsePosition(positionString);
@@ -227,6 +238,8 @@ public class ChessClient {
     }
 
     public String makeMove(String... params) throws ResponseException {
+        assertInGame();
+        assertSignedIn();
         if (params.length >= 2) {
             var from = params[0];
             var to = params[1];
@@ -235,14 +248,19 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: <from> <to>");
     }
 
-    public String redraw() {
+    public String redraw() throws ResponseException {
+        assertInGame();
+        assertSignedIn();
         String username = auth.username();
         ChessBoardUI ui = new ChessBoardUI(game.game());
         return ui.toString(username, game.blackUsername(), game.whiteUsername(), null);
     }
 
-    public String resign() {
-        return "You have resigned";
+    public String resign() throws ResponseException {
+        assertInGame();
+        assertSignedIn();
+        ws.resignGame(auth.authToken(), game.gameID());
+        return "You have resigned the game.";
     }
 
     public String help() {
@@ -281,6 +299,17 @@ public class ChessClient {
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {
             throw new ResponseException(400, "You must sign in");
+        }
+    }
+    private void assertInGame() throws ResponseException {
+        if (state != State.PLAYING) {
+            throw new ResponseException(400, "You must enter a game to perform this action");
+        }
+    }
+
+    private void assertNotInGame() throws ResponseException {
+        if (state == State.PLAYING) {
+            throw new ResponseException(400, "You must leave the game to perform this action");
         }
     }
 }

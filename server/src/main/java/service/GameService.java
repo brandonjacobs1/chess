@@ -3,6 +3,7 @@ package service;
 import chess.ChessBoard;
 import chess.ChessGame;
 import dataAccess.DataAccessException;
+import dataAccess.DatabaseManager;
 import dataAccess.Interfaces.IGameDAO;
 import dataAccess.SqlAccess.SQLGameDAO;
 import model.GameData;
@@ -11,6 +12,9 @@ import model.UserData;
 import server.BadRequestException;
 import server.DuplicateEntryException;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -51,6 +55,31 @@ public class GameService {
             throw new DuplicateEntryException("bad color");
         }
         gameDAO.updateGame(game);
+    }
+
+    public void removePlayer(GameData game, String usernameToRemove) {
+        try {
+            if (game.whiteUsername() != null && game.whiteUsername().equals(usernameToRemove)) {
+                game = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
+            } else if (game.blackUsername() != null && game.blackUsername().equals(usernameToRemove)) {
+                game = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game());
+            }
+            gameDAO.updateGame(game);
+        } catch (Exception e) {
+            throw new RuntimeException("Internal server error");
+        }
+
+    }
+
+    public void completeGame(GameData game) {
+        try {
+            game.game().setComplete(true);
+            game = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+            gameDAO.updateGame(game);
+        } catch (Exception e) {
+            throw new RuntimeException("Internal server error");
+        }
+
     }
     public void clear() throws DataAccessException {
         gameDAO.clear();

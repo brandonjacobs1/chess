@@ -8,15 +8,12 @@ import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinObserverCommand;
-import webSocketMessages.userCommands.JoinPlayerCommand;
-import webSocketMessages.userCommands.UserGameCommand;
+import webSocketMessages.userCommands.*;
 
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 //need to extend Endpoint for websocket to work properly
 public class WebSocketFacade extends Endpoint {
@@ -106,6 +103,24 @@ public class WebSocketFacade extends Endpoint {
     public void joinObserver(String authToken, int gameId) throws ResponseException {
         try {
             var command = new JoinObserverCommand(authToken, gameId);
+            send(command);
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void leaveGame (String authToken, int gameId) throws ResponseException {
+        try {
+            var command = new LeaveCommand(authToken, gameId);
+            send(command);
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void resignGame (String authToken, int gameId) throws ResponseException {
+        try {
+            var command = new ResignCommand(authToken, gameId);
             send(command);
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());

@@ -13,6 +13,8 @@ public class ChessGame {
     TeamColor teamColor;
 
     ChessBoard board;
+
+    boolean isComplete = false;
     public ChessGame() {
         teamColor = TeamColor.WHITE;
     }
@@ -194,5 +196,13 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return this.board;
+    }
+
+    public void setComplete(boolean complete) {
+        isComplete = complete;
+    }
+
+    public boolean isComplete() {
+        return isComplete;
     }
 }
