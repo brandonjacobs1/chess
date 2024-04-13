@@ -22,7 +22,7 @@ import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
-
+import java.util.Objects;
 
 
 @WebSocket
@@ -84,6 +84,12 @@ public class WebSocketHandler {
             if (gameData.game() == null) {
                 throw new WebSocketException("Game has not been created");
             }
+            if (Objects.equals(gameData.whiteUsername(), user.username()) && joinPlayerCommand.getPlayerColor() == ChessGame.TeamColor.BLACK) {
+                throw new WebSocketException("White player cannot join as black");
+            } else if (Objects.equals(gameData.blackUsername(), user.username()) && joinPlayerCommand.getPlayerColor() == ChessGame.TeamColor.WHITE) {
+                throw new WebSocketException("Black player cannot join as white");
+            }
+
             boolean isConnectionAvailable = connections.checkConnectionAvailable(joinPlayerCommand.getGameID(), joinPlayerCommand.getPlayerColor(), joinPlayerCommand.getAuthString());
             if (!isConnectionAvailable) {
                 connections.sessionReply(conn, new ErrorMessage("ERROR: A player is already connected with this color"));
