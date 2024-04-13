@@ -1,7 +1,9 @@
 package webSocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
+import model.UserData;
 import server.ResponseException;
 import ui.ChessBoardUI;
 import webSocketMessages.serverMessages.ErrorMessage;
@@ -20,6 +22,7 @@ public class WebSocketFacade extends Endpoint {
 
     Session session;
     ServerMessageHandler serverMessageHandler;
+    String username;
 
 
     public WebSocketFacade(String url, ServerMessageHandler serverMessageHandler) throws ResponseException {
@@ -39,7 +42,7 @@ public class WebSocketFacade extends Endpoint {
 
                     switch (serverMessage.getServerMessageType()) {
                         case LOAD_GAME -> loadGame(message);
-                        case ERROR -> error(message, session);
+                        case ERROR -> error(message);
                         case NOTIFICATION -> notification(message, session);
                     }
                 }
@@ -70,21 +73,17 @@ public class WebSocketFacade extends Endpoint {
             throw new IOException(ex.getMessage());
         }
     }
-    public void error(String message, Session session) {
+    public void error(String message) {
         ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
+        serverMessageHandler.showErrorMessage(errorMessage);
     }
 
     public void loadGame(String message) {
         LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
-        ChessBoardUI ui = new ChessBoardUI(loadGameMessage.getGame());
-        ui.setValidMoves(null);
-        if (loadGameMessage.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            serverMessageHandler.showLoadGameMessage(ui.printWhite());
-        } else if (loadGameMessage.getTeamColor() == ChessGame.TeamColor.BLACK) {
-            serverMessageHandler.showLoadGameMessage(ui.printBlack());
-        } else {
-            serverMessageHandler.showLoadGameMessage(ui.prettyPrint());
-        }
+        serverMessageHandler.refreshGameList(loadGameMessage.getGame());
+        ChessBoardUI ui = new ChessBoardUI(loadGameMessage.getGame().game());
+        String gameBoard = ui.toString(username, loadGameMessage.getGame().blackUsername(), loadGameMessage.getGame().whiteUsername(), null);
+        serverMessageHandler.showLoadGameMessage(gameBoard);
     }
 
     public void notification(String message, Session session) {
@@ -92,7 +91,8 @@ public class WebSocketFacade extends Endpoint {
         serverMessageHandler.showNotificationMessage(notificationMessage);
     }
 
-    public void joinPlayer(String authToken, int gameId, ChessGame.TeamColor teamColor) throws ResponseException {
+    public void joinPlayer(String authToken, String username, int gameId, ChessGame.TeamColor teamColor) throws ResponseException {
+        this.username = username;
         try {
             var command = new JoinPlayerCommand(authToken, gameId, teamColor);
             send(command);
@@ -100,7 +100,8 @@ public class WebSocketFacade extends Endpoint {
             throw new ResponseException(500, ex.getMessage());
         }
     }
-    public void joinObserver(String authToken, int gameId) throws ResponseException {
+    public void joinObserver(String authToken, String username, int gameId) throws ResponseException {
+        this.username = username;
         try {
             var command = new JoinObserverCommand(authToken, gameId);
             send(command);
@@ -121,6 +122,15 @@ public class WebSocketFacade extends Endpoint {
     public void resignGame (String authToken, int gameId) throws ResponseException {
         try {
             var command = new ResignCommand(authToken, gameId);
+            send(command);
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void move (String authToken, int gameId, ChessMove move) throws ResponseException {
+        try {
+            var command = new MakeMoveCommand(authToken, move, gameId);
             send(command);
         } catch (IOException ex) {
             throw new ResponseException(500, ex.getMessage());

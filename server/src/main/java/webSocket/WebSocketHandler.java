@@ -1,6 +1,7 @@
 package webSocket;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
 import dataAccess.Interfaces.IGameDAO;
@@ -8,12 +9,14 @@ import dataAccess.SqlAccess.SQLGameDAO;
 import model.GameData;
 import model.UserData;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import server.BadRequestException;
 import server.NotAuthenticatedException;
 import service.GameService;
 import service.UserService;
+import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.LoadGameMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
 import webSocketMessages.userCommands.*;
@@ -43,6 +46,12 @@ public class WebSocketHandler {
         }
     }
 
+    @OnWebSocketError
+    public void onError(Throwable error) {
+        System.out.println("Error: " + error.getMessage());
+    }
+
+
     private UserData authenticate(String authToken) {
         if (authToken == null) {
             throw new RuntimeException("No auth token provided");
@@ -65,7 +74,7 @@ public class WebSocketHandler {
         connections.add(joinPlayerCommand.getAuthString(), joinPlayerCommand.getGameId(), session);
         var notification = new NotificationMessage(user.username() + " joined the game as the " + joinPlayerCommand.getTeamColor() + " player");
         connections.broadcastNonRootClient(joinPlayerCommand.getAuthString(), joinPlayerCommand.getGameId(), notification);
-        LoadGameMessage loadGameMessage = loadGame(joinPlayerCommand.getGameId(), joinPlayerCommand.getTeamColor());
+        LoadGameMessage loadGameMessage = loadGame(joinPlayerCommand.getGameId(), user.username());
         connections.reply(joinPlayerCommand.getAuthString(), loadGameMessage);
     }
     private void joinObserver(String message, Session session) throws IOException {
@@ -74,12 +83,61 @@ public class WebSocketHandler {
         connections.add(joinObserverCommand.getAuthString(), joinObserverCommand.getGameId(), session);
         var notification = new NotificationMessage(user.username() + " joined the game as an observer");
         connections.broadcastNonRootClient(joinObserverCommand.getAuthString(), joinObserverCommand.getGameId(), notification);
-        LoadGameMessage loadGameMessage = loadGame(joinObserverCommand.getGameId(), null);
+        LoadGameMessage loadGameMessage = loadGame(joinObserverCommand.getGameId(), user.username());
         connections.reply(joinObserverCommand.getAuthString(), loadGameMessage);
     }
     private void move(String message, Session session) throws IOException {
-        MakeMoveCommand makeMoveCommand = new Gson().fromJson(message, MakeMoveCommand.class);
+        try {
+            MakeMoveCommand makeMoveCommand = new Gson().fromJson(message, MakeMoveCommand.class);
+            UserData user = authenticate(makeMoveCommand.getAuthString());
+            int gameId = makeMoveCommand.getGameId();
+            GameData gameData;
+            try {
+                gameData = gameDAO.getGame(gameId);
+            } catch (DataAccessException | BadRequestException e) {
+                throw new RuntimeException("Error loading game");
+            }
+            ChessGame.TeamColor teamColor = getTeamColor(user, gameData);
+
+            ChessGame chessGame = gameData.game();
+            if (teamColor == chessGame.getTeamTurn()) {
+                try {
+                    chessGame.makeMove(makeMoveCommand.getMove());
+                } catch (InvalidMoveException e) {
+                    throw new RuntimeException("Invalid move");
+                }
+            } else {
+                ErrorMessage errorMessage = new ErrorMessage("It is not your turn");
+                connections.reply(makeMoveCommand.getAuthString(), errorMessage);
+            }
+
+            gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame);
+            try {
+                gameDAO.updateGame(gameData);
+            } catch (DataAccessException | BadRequestException e) {
+                throw new RuntimeException("Error updating game");
+            }
+            LoadGameMessage loadGameMessage = loadGame(gameId, user.username());
+            connections.broadcastAll(makeMoveCommand.getGameId(), loadGameMessage);
+            NotificationMessage notification = new NotificationMessage(user.username() + " moved " + makeMoveCommand.getMove().toString());
+            connections.broadcastNonRootClient(makeMoveCommand.getAuthString(), makeMoveCommand.getGameId(), notification);
+        } catch (Exception e) {
+            connections.reply(new Gson().fromJson(message, UserGameCommand.class).getAuthString(), new ErrorMessage(e.getMessage()));
+        }
     }
+
+    private ChessGame.TeamColor getTeamColor(UserData user, GameData gameData) {
+        ChessGame.TeamColor teamColor;
+        if (user.username().equals(gameData.whiteUsername())) {
+            teamColor = ChessGame.TeamColor.WHITE;
+        } else if (user.username().equals(gameData.blackUsername())) {
+            teamColor = ChessGame.TeamColor.BLACK;
+        } else {
+            throw new RuntimeException("User is not a player in this game");
+        }
+        return teamColor;
+    }
+
     private void leave(String message, Session session) throws IOException {
         LeaveCommand leaveCommand = new Gson().fromJson(message, LeaveCommand.class);
         UserData user = authenticate(leaveCommand.getAuthString());
@@ -106,18 +164,17 @@ public class WebSocketHandler {
             throw new RuntimeException("Error loading game");
         }
         gameService.completeGame(gameData);
-        connections.broadcastAll(resignCommand.getAuthString(), resignCommand.getGameId(), new NotificationMessage(user.username() + " has resigned the game."));
+        connections.broadcastAll(resignCommand.getGameId(), new NotificationMessage(user.username() + " has resigned the game."));
         connections.closeAllConnections(resignCommand.getGameId());
     }
 
-    private LoadGameMessage loadGame(int gameId, ChessGame.TeamColor color) {
+    private LoadGameMessage loadGame(int gameId, String username) {
         GameData gameData;
         try {
             gameData = gameDAO.getGame(gameId);
         } catch (DataAccessException | BadRequestException e) {
             throw new RuntimeException("Error loading game");
         }
-        ChessGame game = gameData.game();
-        return new LoadGameMessage(game, color);
+        return new LoadGameMessage(gameData, username);
     }
 }

@@ -1,8 +1,9 @@
 package server;
 
+import model.GameData;
 import webSocket.ServerMessageHandler;
+import webSocketMessages.serverMessages.ErrorMessage;
 import webSocketMessages.serverMessages.NotificationMessage;
-import webSocketMessages.serverMessages.ServerMessage;
 
 import java.util.Scanner;
 
@@ -49,6 +50,17 @@ public class Repl implements ServerMessageHandler {
     }
     private void printPrompt() {
         System.out.print("\n" + RESET + ">>> " + GREEN);
+    }
+
+    public void refreshGameList(GameData game) {
+        client.updateGameList(game);
+    }
+
+    public void showErrorMessage(ErrorMessage message) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ERASE_LINE).append(RED).append(message.getMessage()).append(RESET);
+        System.out.print(sb);
+        printPrompt();
     }
 
 }

@@ -93,7 +93,7 @@ public class ChessClient {
         state = State.SIGNEDOUT;
         return String.format("You have signed out.");
     }
-    private void setGames() throws ResponseException {
+    public void setGames() throws ResponseException {
         try {
             var gameMap = this.server.listGames(this.auth);
             ArrayList<GameData> games = gameMap.get("games");
@@ -152,7 +152,7 @@ public class ChessClient {
             setGames();
             selectedGame = this.games.get(gameNumber - 1);
             ws = new WebSocketFacade(serverUrl, serverMessageHandler);
-            ws.joinPlayer(this.auth.authToken(),selectedGame.gameID(), color);
+            ws.joinPlayer(this.auth.authToken(), this.auth.username(), selectedGame.gameID(), color);
             state = State.PLAYING;
             game = selectedGame;
             return String.format("You joined game \"%s\" as %s!", selectedGame.gameName(), playerColor);
@@ -182,7 +182,7 @@ public class ChessClient {
                 throw new ResponseException(400, "Game has not been started. Please wait for a player to join.");
             }
             ws = new WebSocketFacade(serverUrl, serverMessageHandler);
-            ws.joinObserver(this.auth.authToken(),selectedGame.gameID());
+            ws.joinObserver(this.auth.authToken(), this.auth.username(), selectedGame.gameID());
             state = State.PLAYING;
             game = selectedGame;
             return String.format("You joined game \"%s\" as an observer!", selectedGame.gameName());
@@ -243,7 +243,19 @@ public class ChessClient {
         if (params.length >= 2) {
             var from = params[0];
             var to = params[1];
-            return "Move made";
+            ChessPosition fromPosition = parsePosition(from);
+            ChessPosition toPosition = parsePosition(to);
+            Collection<ChessMove> validMoves = game.game().validMoves(fromPosition);
+
+            // If there is a promo piece grab it from here instead of rerunning the check
+            for (ChessMove validMove : validMoves) {
+                if (validMove.getEndPosition().equals(toPosition)) {
+                    ws.move(auth.authToken(), game.gameID(), validMove);
+                    return "";
+                }
+            }
+
+            throw new ResponseException(500, "Unable to make move");
         }
         throw new ResponseException(400, "Expected: <from> <to>");
     }
@@ -252,6 +264,7 @@ public class ChessClient {
         assertInGame();
         assertSignedIn();
         String username = auth.username();
+
         ChessBoardUI ui = new ChessBoardUI(game.game());
         return ui.toString(username, game.blackUsername(), game.whiteUsername(), null);
     }
@@ -311,5 +324,16 @@ public class ChessClient {
         if (state == State.PLAYING) {
             throw new ResponseException(400, "You must leave the game to perform this action");
         }
+    }
+
+    public void updateGameList(GameData newGame) {
+        int gameId = newGame.gameID();
+        for (int i = 0; i < games.size(); i++) {
+            if (games.get(i).gameID().equals(gameId)) {
+                games.set(i, newGame);
+                break;
+            }
+        }
+        game = newGame;
     }
 }

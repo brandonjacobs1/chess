@@ -40,7 +40,7 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcastAll(String rootClientAuthString, int gameId, ServerMessage serverMessage) throws IOException {
+    public void broadcastAll(int gameId, ServerMessage serverMessage) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {

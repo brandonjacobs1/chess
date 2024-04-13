@@ -19,10 +19,6 @@ public class ChessBoardUI {
         this.game = game;
     }
 
-    public void setValidMoves(Collection<ChessMove> validMoves) {
-        this.validMoves = validMoves;
-    }
-
     public String toString(String username, String blackUsername, String whiteUsername, Collection<ChessMove> validMoves) {
         this.validMoves = validMoves;
         if (Objects.equals(username, whiteUsername)) {
