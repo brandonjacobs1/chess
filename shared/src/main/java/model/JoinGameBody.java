@@ -2,6 +2,6 @@ package model;
 
 import chess.ChessGame.TeamColor;
 
-public record JoinGameBody(TeamColor color, int gameID) {
+public record JoinGameBody(TeamColor playerColor, int gameID) {
 
 }
