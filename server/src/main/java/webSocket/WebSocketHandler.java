@@ -117,10 +117,22 @@ public class WebSocketHandler {
             } catch (DataAccessException | BadRequestException e) {
                 throw new RuntimeException("Error updating game");
             }
+
+            boolean isInCheck = chessGame.isInCheck(chessGame.getTeamTurn());
+            boolean isCheckmate = chessGame.isInCheckmate(chessGame.getTeamTurn());
+
             LoadGameMessage loadGameMessage = loadGame(gameId, user.username());
             connections.broadcastAll(makeMoveCommand.getGameId(), loadGameMessage);
             NotificationMessage notification = new NotificationMessage(user.username() + " moved " + makeMoveCommand.getMove().toString());
             connections.broadcastNonRootClient(makeMoveCommand.getAuthString(), makeMoveCommand.getGameId(), notification);
+
+            if (isCheckmate) {
+                gameService.completeGame(gameData);
+                connections.broadcastAll(makeMoveCommand.getGameId(), new NotificationMessage("Checkmate! " + user.username() + " has won the game."));
+                connections.closeAllConnections(makeMoveCommand.getGameId());
+            } else if (isInCheck) {
+                connections.broadcastAll(makeMoveCommand.getGameId(), new NotificationMessage("Check! " + user.username() + " is in check."));
+            }
         } catch (Exception e) {
             connections.reply(new Gson().fromJson(message, UserGameCommand.class).getAuthString(), new ErrorMessage(e.getMessage()));
         }
