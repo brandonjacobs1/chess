@@ -195,7 +195,7 @@ public class WebSocketHandler {
                 throw new WebSocketException("Error loading game");
             }
             gameService.removePlayer(gameData, user.username());
-            gameService.completeGame(gameData);
+            // gameService.completeGame(gameData);
             NotificationMessage notification = new NotificationMessage(user.username() + " has left the game");
             connections.broadcastNonRootClient(leaveCommand.getAuthString(), leaveCommand.getGameID(), notification);
             session.close();
