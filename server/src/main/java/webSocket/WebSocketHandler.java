@@ -163,7 +163,6 @@ public class WebSocketHandler {
             if (isCheckmate) {
                 gameService.completeGame(gameData);
                 connections.broadcastAll(makeMoveCommand.getGameID(), new NotificationMessage("Checkmate! " + user.username() + " has won the game."));
-//                connections.closeAllConnections(makeMoveCommand.getGameID());
             } else if (isInCheck) {
                 connections.broadcastAll(makeMoveCommand.getGameID(), new NotificationMessage("Check! " + user.username() + " is in check."));
             }

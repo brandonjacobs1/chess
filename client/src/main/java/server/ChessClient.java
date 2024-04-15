@@ -178,9 +178,10 @@ public class ChessClient {
     public String observeGame(String... params) throws ResponseException {
         assertSignedIn();
         assertNotInGame();
+        GameData selectedGame;
         if (params.length >= 1) {
-            var gameNumber = parseInt(params[0]);
-            GameData selectedGame = this.games.get(gameNumber - 1);
+            int key = parseInt(params[0]);
+            selectedGame = this.games.get(key);
             if (selectedGame.game() == null) {
                 throw new ResponseException(400, "Game has not been started. Please wait for a player to join.");
             }
@@ -276,7 +277,7 @@ public class ChessClient {
         assertInGame();
         assertSignedIn();
         ws.resignGame(auth.authToken(), game.gameID());
-        return "You have resigned the game.";
+        return "";
     }
 
     public String help() {
